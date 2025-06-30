@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - PostgreSQL configuration (with SQLite fallback)
 - Proper API structure with `/api/` prefix
 
-**Frontend**: `Edgewater/` - Connected with:
+**Frontend**: `Edgewater-1/edgewater-frontend/` - Connected with:
 - Updated AuthContext for new API endpoints
 - Created API service layer with automatic token handling
 - Event and SasqWatch services ready for integration
@@ -31,11 +31,10 @@ flask db upgrade
 flask run
 ```
 
-### Frontend Setup (Edgewater/)
+### Frontend Setup (Edgewater-1/edgewater-frontend/)
 ```bash
 npm install
-cp .env.template .env
-# Edit .env with your API URL and Google Client ID
+# Create .env file with your API URL and Google Client ID
 npm start
 ```
 
@@ -44,6 +43,10 @@ npm start
 flask db migrate -m "Migration description"
 flask db upgrade
 ```
+
+### Running the Application
+Backend runs on `http://localhost:5000` by default.
+Frontend runs on `http://localhost:3000` by default.
 
 ## Architecture Overview
 
@@ -61,14 +64,14 @@ flask db upgrade
 - **Authentication**: JWT tokens with 30-day expiration
 - **Configuration**: Environment-based config with CORS and security settings
 
-### Frontend (React - Edgewater/)
+### Frontend (React - Edgewater-1/edgewater-frontend/)
 - **Single Page Application**: React Router with protected routes
 - **Authentication**: ✅ Updated AuthContext with proper API integration
 - **API Layer**: ✅ Centralized API service with automatic token handling
 - **Services**: 
+  - ✅ `authService.js` - Complete authentication management
   - ✅ `eventService.js` - Complete event management
-  - ✅ `sasqwatchService.js` - Sasquatch sighting operations
-  - 🚧 Additional services needed for photos, messages, bags
+  - 🚧 Additional services needed for sasqwatch, photos, messages, bags
 - **Component Structure**: 
   - `MainApp.js` orchestrates the main tabbed interface
   - View components for each feature (Calendar, Music, Dinner, Photos, Messages, SasqWatch, Bags)
@@ -98,9 +101,9 @@ S3_BUCKET_NAME=your-bucket-name
 CORS_ORIGINS=http://localhost:3000
 ```
 
-**Frontend (.env)** - Copy from `.env.template`:
+**Frontend (.env)** - Create manually in `Edgewater-1/edgewater-frontend/`:
 ```bash
-REACT_APP_API_URL=http://localhost:5000/api
+REACT_APP_API_URL=http://localhost:5000
 REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 
