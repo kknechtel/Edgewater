@@ -560,6 +560,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
                     onCommentInputChange={(value) => setCommentInputs({ ...commentInputs, [event.id]: value })}
                     isOwner={user?.id === event.creator_id}
                     currentUser={user}
+                    isDarkMode={isDarkMode}
                   />
                 ))}
               </div>
@@ -619,6 +620,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
                     onCommentInputChange={(value) => setCommentInputs({ ...commentInputs, [event.id]: value })}
                     isOwner={user?.id === event.creator_id}
                     currentUser={user}
+                    isDarkMode={isDarkMode}
                   />
                 ))}
               </div>
@@ -1070,7 +1072,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
 };
 
 // Event Card Component
-const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddComment, commentInput, onCommentInputChange, isOwner, currentUser }) => {
+const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddComment, commentInput, onCommentInputChange, isOwner, currentUser, isDarkMode }) => {
   const getEventTypeColor = (type) => {
     const colors = {
       party: '#fbbf24',
@@ -1155,7 +1157,7 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
 
           {/* RSVP Button - Always Visible */}
           <div style={{ marginTop: '0.5rem' }}>
-            {user ? (
+            {currentUser ? (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1163,7 +1165,7 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
                 }}
                 style={{
                   padding: '0.375rem 0.75rem',
-                  backgroundColor: rsvpService.getUserRSVPStatus(event.id, user?.id) === 'going' 
+                  backgroundColor: rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' 
                     ? '#10b981' 
                     : '#3b82f6',
                   color: 'white',
@@ -1175,7 +1177,7 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
                   marginRight: '0.5rem'
                 }}
               >
-                {rsvpService.getUserRSVPStatus(event.id, user?.id) === 'going' ? '✓ Going' : '+ RSVP'}
+                {rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' ? '✓ Going' : '+ RSVP'}
               </button>
             ) : (
               <button
