@@ -71,7 +71,7 @@ const MobileApp = () => {
       case 'more':
         return <MoreView setActiveTab={setActiveTab} />;
       case 'profile':
-        return <UserProfile />;
+        return <UserProfile onClose={() => setActiveTab('more')} />;
       case 'photos':
         return <Photos />;
       case 'music':

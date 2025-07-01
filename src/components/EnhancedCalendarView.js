@@ -275,13 +275,22 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
               {band.name}
             </h2>
             <button
-              onClick={() => setShowBandDetails(null)}
+              onClick={() => {
+                console.log('Closing band modal');
+                setShowBandDetails(null);
+              }}
               style={{
                 background: 'none',
                 border: 'none',
                 fontSize: '1.5rem',
                 cursor: 'pointer',
-                color: '#6b7280'
+                color: '#6b7280',
+                padding: '0.5rem',
+                minWidth: '44px',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
               ×
@@ -920,13 +929,18 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
     container: {
       minHeight: '100vh',
       paddingBottom: '5rem',
-      backgroundColor: '#f9fafb'
+      backgroundColor: '#f9fafb',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch'
     },
     header: {
       backgroundColor: '#ffffff',
       borderBottom: '1px solid #e5e7eb',
-      padding: '1.5rem',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+      padding: '1rem',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 10
     },
     headerTop: {
       display: 'flex',
@@ -937,12 +951,15 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       gap: '0.75rem'
     },
     title: {
-      fontSize: '1.75rem',
+      fontSize: '1.5rem',
       fontWeight: '700',
       color: '#111827',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem'
+      gap: '0.5rem',
+      '@media (min-width: 768px)': {
+        fontSize: '1.75rem'
+      }
     },
     subtitle: {
       fontSize: '0.875rem',
@@ -952,7 +969,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       backgroundColor: '#0891b2',
       color: 'white',
       border: 'none',
-      padding: '0.75rem 1.5rem',
+      padding: '0.5rem 1rem',
       borderRadius: '0.75rem',
       fontSize: '0.875rem',
       fontWeight: '600',
@@ -960,14 +977,15 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       minHeight: '44px',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem',
-      transition: 'all 0.2s'
+      gap: '0.25rem',
+      transition: 'all 0.2s',
+      whiteSpace: 'nowrap'
     },
     btnSecondary: {
       backgroundColor: '#f59e0b',
       color: 'white',
       border: 'none',
-      padding: '0.75rem 1.5rem',
+      padding: '0.5rem 1rem',
       borderRadius: '0.75rem',
       fontSize: '0.875rem',
       fontWeight: '600',
@@ -975,11 +993,14 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       minHeight: '44px',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem',
-      transition: 'all 0.2s'
+      gap: '0.25rem',
+      transition: 'all 0.2s',
+      whiteSpace: 'nowrap'
     },
     content: {
-      padding: '1rem'
+      padding: '1rem',
+      maxWidth: '100vw',
+      overflowX: 'hidden'
     },
     viewToggle: {
       display: 'flex',
