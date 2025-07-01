@@ -14,7 +14,7 @@ def verify_google_token(token):
         
         # Extract user information
         return {
-            'google_id': idinfo['sub'],
+            'sub': idinfo['sub'],  # Keep as 'sub' to match auth_routes.py
             'email': idinfo['email'],
             'name': idinfo.get('name', ''),
             'picture': idinfo.get('picture', ''),
