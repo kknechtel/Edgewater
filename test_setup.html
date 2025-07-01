@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Beach Club App Test Setup</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; }
+        .button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 10px 0; }
+        .success { color: #10b981; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🏖️ Beach Club App - Test Setup</h1>
+    
+    <div class="section">
+        <h2>🗨️ Load Test Messages</h2>
+        <p>Click to add test messages and unread counts to localStorage:</p>
+        <button class="button" onclick="loadTestMessages()">Load Test Messages</button>
+        <div id="messageStatus"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🔔 Test Notifications</h2>
+        <p>Test browser notifications (you'll need to grant permission):</p>
+        <button class="button" onclick="testNotifications()">Test Browser Notification</button>
+        <button class="button" onclick="testToast()">Test Toast Notification</button>
+        <div id="notificationStatus"></div>
+    </div>
+    
+    <div class="section">
+        <h2>📍 Test Location Service</h2>
+        <p>Test location detection and time zone calculation:</p>
+        <button class="button" onclick="testLocation()">Get Current Location</button>
+        <div id="locationStatus"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🎫 Test RSVPs</h2>
+        <p>Create test RSVPs for events:</p>
+        <button class="button" onclick="createTestRSVPs()">Create Test RSVPs</button>
+        <div id="rsvpStatus"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🎯 Clear All Data</h2>
+        <p>Reset the app by clearing all localStorage data:</p>
+        <button class="button" onclick="clearAllData()" style="background: #ef4444;">Clear All Data</button>
+        <div id="clearStatus"></div>
+    </div>
+
+    <script>
+        function loadTestMessages() {
+            try {
+                // Load test messages
+                localStorage.setItem("beach_club_messages", `[[1,[{"id":1,"content":"Welcome everyone to the beach club app! Looking forward to a great season.","senderId":"admin","senderName":"Beach Club Admin","timestamp":"${new Date(Date.now() - 3600000).toISOString()}","chatId":1}]],[2,[{"id":2,"content":"Saturday cleanup starts at 8am sharp! Bring gloves and water.","senderId":"sarah_beach","senderName":"Sarah Mitchell","timestamp":"${new Date(Date.now() - 1800000).toISOString()}","chatId":2},{"id":3,"content":"I'll bring extra trash bags and pickup tools","senderId":"mike_waves","senderName":"Mike Johnson","timestamp":"${new Date(Date.now() - 900000).toISOString()}","chatId":2}]],[6,[{"id":4,"content":"Hey, want to play some bags later?","senderId":"mike_waves","senderName":"Mike Johnson","timestamp":"${new Date(Date.now() - 172800000).toISOString()}","chatId":6},{"id":5,"content":"I'm organizing a tournament this weekend if you're interested!","senderId":"mike_waves","senderName":"Mike Johnson","timestamp":"${new Date(Date.now() - 86400000).toISOString()}","chatId":6},{"id":6,"content":"Definitely! What time works for you?","senderId":"mike_waves","senderName":"Mike Johnson","timestamp":"${new Date(Date.now() - 3600000).toISOString()}","chatId":6}]]]`);
+                
+                // Load unread counts
+                localStorage.setItem("beach_club_unread", "[[1,1],[2,2],[6,3]]");
+                
+                document.getElementById('messageStatus').innerHTML = '<div class="success">✅ Test messages loaded successfully! Total unread: 6</div>';
+            } catch (error) {
+                document.getElementById('messageStatus').innerHTML = '<div style="color: #ef4444;">❌ Error loading messages: ' + error.message + '</div>';
+            }
+        }
+        
+        async function testNotifications() {
+            try {
+                if (!('Notification' in window)) {
+                    throw new Error('Browser does not support notifications');
+                }
+                
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    new Notification('Beach Club Test', {
+                        body: 'Notifications are working! 🏖️',
+                        icon: '/favicon.ico'
+                    });
+                    document.getElementById('notificationStatus').innerHTML = '<div class="success">✅ Browser notification sent!</div>';
+                } else {
+                    document.getElementById('notificationStatus').innerHTML = '<div style="color: #f59e0b;">⚠️ Notification permission denied</div>';
+                }
+            } catch (error) {
+                document.getElementById('notificationStatus').innerHTML = '<div style="color: #ef4444;">❌ Error: ' + error.message + '</div>';
+            }
+        }
+        
+        function testToast() {
+            // Create a simple toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+            toast.innerHTML = '🏖️ Test toast notification!';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 3000);
+            
+            document.getElementById('notificationStatus').innerHTML = '<div class="success">✅ Toast notification displayed!</div>';
+        }
+        
+        async function testLocation() {
+            try {
+                document.getElementById('locationStatus').innerHTML = 'Getting location...';
+                
+                if (!navigator.geolocation) {
+                    throw new Error('Geolocation not supported');
+                }
+                
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        
+                        // Get city info
+                        try {
+                            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                            const data = await response.json();
+                            
+                            document.getElementById('locationStatus').innerHTML = `
+                                <div class="success">
+                                    ✅ Location detected:<br>
+                                    📍 ${data.city || 'Unknown'}, ${data.principalSubdivision || ''}<br>
+                                    🌐 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}<br>
+                                    🕐 Local time: ${new Date().toLocaleString()}
+                                </div>
+                            `;
+                        } catch (geoError) {
+                            document.getElementById('locationStatus').innerHTML = `
+                                <div class="success">
+                                    ✅ Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}<br>
+                                    (City lookup failed)
+                                </div>
+                            `;
+                        }
+                    },
+                    (error) => {
+                        document.getElementById('locationStatus').innerHTML = `
+                            <div style="color: #f59e0b;">
+                                ⚠️ Location error: ${error.message}<br>
+                                Using default location: Seabright, CA
+                            </div>
+                        `;
+                    }
+                );
+            } catch (error) {
+                document.getElementById('locationStatus').innerHTML = '<div style="color: #ef4444;">❌ Error: ' + error.message + '</div>';
+            }
+        }
+        
+        function createTestRSVPs() {
+            try {
+                const testUsers = [
+                    { id: 'user1', name: 'Sarah Mitchell' },
+                    { id: 'user2', name: 'Mike Johnson' },
+                    { id: 'user3', name: 'Kelly Rodriguez' },
+                    { id: 'user4', name: 'Brad Cooper' },
+                    { id: 'user5', name: 'Nash Thompson' }
+                ];
+
+                // Event IDs from our database
+                const eventIds = [
+                    '5419934d-dfe9-45a9-a8e3-682986f07752', // Beach Volleyball
+                    '49bb7185-0fdf-4712-a355-fb5998fd7ea8', // Live Music
+                    'bfba10f6-fbfe-40cb-a4b1-bf24b9b2b33f'  // Yoga
+                ];
+
+                const rsvps = {};
+                const attendees = {};
+
+                // Create random RSVPs
+                eventIds.forEach((eventId, eventIndex) => {
+                    const numAttendees = Math.floor(Math.random() * 4) + 2; // 2-5 attendees
+                    const shuffledUsers = [...testUsers].sort(() => Math.random() - 0.5);
+                    
+                    attendees[eventId] = [];
+                    
+                    for (let i = 0; i < numAttendees; i++) {
+                        const user = shuffledUsers[i];
+                        if (user) {
+                            // Add to user RSVPs
+                            if (!rsvps[user.id]) rsvps[user.id] = [];
+                            rsvps[user.id].push({
+                                eventId,
+                                status: 'going',
+                                timestamp: new Date().toISOString()
+                            });
+                            
+                            // Add to event attendees
+                            attendees[eventId].push({
+                                userId: user.id,
+                                userName: user.name,
+                                status: 'going',
+                                timestamp: new Date().toISOString()
+                            });
+                        }
+                    }
+                });
+
+                localStorage.setItem('beach_club_rsvps', JSON.stringify(rsvps));
+                localStorage.setItem('beach_club_attendees', JSON.stringify(attendees));
+                
+                let totalAttendees = 0;
+                Object.values(attendees).forEach(eventAttendees => {
+                    totalAttendees += eventAttendees.length;
+                });
+                
+                document.getElementById('rsvpStatus').innerHTML = `<div class="success">✅ Test RSVPs created! ${totalAttendees} total RSVPs across ${eventIds.length} events</div>`;
+            } catch (error) {
+                document.getElementById('rsvpStatus').innerHTML = '<div style="color: #ef4444;">❌ Error creating RSVPs: ' + error.message + '</div>';
+            }
+        }
+        
+        function clearAllData() {
+            try {
+                // Clear all beach club related localStorage
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.includes('beach_club') || key.includes('bags') || key.includes('userLocation')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                
+                document.getElementById('clearStatus').innerHTML = '<div class="success">✅ All app data cleared!</div>';
+            } catch (error) {
+                document.getElementById('clearStatus').innerHTML = '<div style="color: #ef4444;">❌ Error clearing data: ' + error.message + '</div>';
+            }
+        }
+        
+        // Show current status on page load
+        window.onload = function() {
+            const hasMessages = localStorage.getItem('beach_club_messages');
+            const hasUnread = localStorage.getItem('beach_club_unread');
+            
+            if (hasMessages && hasUnread) {
+                document.getElementById('messageStatus').innerHTML = '<div style="color: #3b82f6;">ℹ️ Test messages already loaded</div>';
+            }
+            
+            // Show notification permission status
+            if ('Notification' in window) {
+                document.getElementById('notificationStatus').innerHTML = '<div style="color: #3b82f6;">ℹ️ Notification permission: ' + Notification.permission + '</div>';
+            }
+        };
+    </script>
+</body>
+</html>

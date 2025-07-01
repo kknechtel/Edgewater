@@ -4,7 +4,7 @@ const GoogleSignIn = ({ onSuccess, onError }) => {
   useEffect(() => {
     if (window.google) {
       window.google.accounts.id.initialize({
-        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-google-client-id.apps.googleusercontent.com',
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || '951154910259-j8tncrdvanjn5d7drn167mvjf56tln3r.apps.googleusercontent.com',
         callback: handleCredentialResponse,
       });
 
@@ -30,10 +30,6 @@ const GoogleSignIn = ({ onSuccess, onError }) => {
   return (
     <div>
       <div id="google-signin-button"></div>
-      <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-        Note: You'll need to configure Google OAuth credentials to use this feature.
-        See GOOGLE_OAUTH_SETUP.md for instructions.
-      </p>
     </div>
   );
 };

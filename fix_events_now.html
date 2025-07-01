@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head><title>Fix Events Now</title></head>
+<body>
+<script>
+// Force create events that WILL show up
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+const nextWeek = new Date(today);
+nextWeek.setDate(nextWeek.getDate() + 7);
+
+const events = [
+    {
+        id: 'event-1',
+        title: 'Beach Volleyball Tournament',
+        description: 'Epic volleyball on the beach!',
+        event_date: tomorrow.toISOString(),
+        event_time: '2:00 PM',
+        location: 'Beach Court',
+        event_type: 'gathering'
+    },
+    {
+        id: 'event-2',
+        title: 'Live Music: The Wave Runners',
+        description: 'Acoustic beach vibes',
+        event_date: nextWeek.toISOString(),
+        event_time: '6:00 PM',
+        location: 'Beach Stage',
+        event_type: 'concert'
+    },
+    {
+        id: 'event-3',
+        title: 'Sunset Yoga',
+        description: 'Relax and unwind',
+        event_date: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+        event_time: '7:00 PM',
+        location: 'Beach Deck',
+        event_type: 'gathering'
+    }
+];
+
+// Save directly to localStorage
+localStorage.setItem('test_events', JSON.stringify(events));
+
+// Create RSVPs
+const attendees = {
+    'event-1': [
+        {userId: 'user1', userName: 'Sarah Mitchell', status: 'going'},
+        {userId: 'user2', userName: 'Mike Johnson', status: 'going'},
+        {userId: 'user3', userName: 'Kelly Rodriguez', status: 'going'}
+    ],
+    'event-2': [
+        {userId: 'user1', userName: 'Sarah Mitchell', status: 'going'},
+        {userId: 'user4', userName: 'Brad Cooper', status: 'going'}
+    ],
+    'event-3': [
+        {userId: 'user2', userName: 'Mike Johnson', status: 'going'},
+        {userId: 'user3', userName: 'Kelly Rodriguez', status: 'going'},
+        {userId: 'user4', userName: 'Brad Cooper', status: 'going'},
+        {userId: 'user5', userName: 'Nash Thompson', status: 'going'}
+    ]
+};
+
+localStorage.setItem('beach_club_attendees', JSON.stringify(attendees));
+
+alert('✅ Events fixed! Refresh your app now.');
+</script>
+</body>
+</html>

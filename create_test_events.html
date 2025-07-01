@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Test Events</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; }
+        .button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 10px 0; }
+        .success { color: #10b981; }
+    </style>
+</head>
+<body>
+    <h1>🏖️ Create Test Events for Home Page</h1>
+    
+    <button class="button" onclick="createTestEvents()">Create Test Events with RSVPs</button>
+    <div id="status"></div>
+    
+    <script>
+        function createTestEvents() {
+            try {
+                // Create test events that will show on home page
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const nextWeek = new Date(today);
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                
+                const testEvents = [
+                    {
+                        id: 'test-event-1',
+                        title: 'Beach Volleyball Tournament',
+                        description: 'Join us for a fun volleyball tournament on the beach!',
+                        event_date: tomorrow.toISOString(),
+                        event_time: '2:00 PM',
+                        location: 'Beach Court',
+                        event_type: 'gathering'
+                    },
+                    {
+                        id: 'test-event-2', 
+                        title: 'Live Music: The Wave Runners',
+                        description: 'Acoustic beach music with The Wave Runners',
+                        event_date: nextWeek.toISOString(),
+                        event_time: '6:00 PM',
+                        location: 'Beach Stage',
+                        event_type: 'concert'
+                    },
+                    {
+                        id: 'test-event-3',
+                        title: 'Sunset Yoga Session',
+                        description: 'Relax and unwind with sunset yoga',
+                        event_date: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+                        event_time: '7:00 PM',
+                        location: 'Beach Deck',
+                        event_type: 'gathering'
+                    }
+                ];
+                
+                // Store events in localStorage (simulate API response)
+                localStorage.setItem('test_events', JSON.stringify(testEvents));
+                
+                // Create test RSVPs
+                const testUsers = [
+                    { id: 'user1', name: 'Sarah Mitchell' },
+                    { id: 'user2', name: 'Mike Johnson' },
+                    { id: 'user3', name: 'Kelly Rodriguez' },
+                    { id: 'user4', name: 'Brad Cooper' },
+                    { id: 'user5', name: 'Nash Thompson' }
+                ];
+
+                const rsvps = {};
+                const attendees = {};
+
+                // Create RSVPs for each event
+                testEvents.forEach((event, eventIndex) => {
+                    const numAttendees = Math.floor(Math.random() * 4) + 2; // 2-5 attendees
+                    const shuffledUsers = [...testUsers].sort(() => Math.random() - 0.5);
+                    
+                    attendees[event.id] = [];
+                    
+                    for (let i = 0; i < numAttendees; i++) {
+                        const user = shuffledUsers[i];
+                        if (user) {
+                            // Add to user RSVPs
+                            if (!rsvps[user.id]) rsvps[user.id] = [];
+                            rsvps[user.id].push({
+                                eventId: event.id,
+                                status: 'going',
+                                timestamp: new Date().toISOString()
+                            });
+                            
+                            // Add to event attendees
+                            attendees[event.id].push({
+                                userId: user.id,
+                                userName: user.name,
+                                status: 'going',
+                                timestamp: new Date().toISOString()
+                            });
+                        }
+                    }
+                });
+
+                localStorage.setItem('beach_club_rsvps', JSON.stringify(rsvps));
+                localStorage.setItem('beach_club_attendees', JSON.stringify(attendees));
+                
+                let totalAttendees = 0;
+                Object.values(attendees).forEach(eventAttendees => {
+                    totalAttendees += eventAttendees.length;
+                });
+                
+                document.getElementById('status').innerHTML = 
+                    `<div class="success">✅ Created ${testEvents.length} test events with ${totalAttendees} total RSVPs!<br>
+                    Events: ${testEvents.map(e => e.title).join(', ')}<br>
+                    Now refresh your beach club app to see them!</div>`;
+                    
+            } catch (error) {
+                document.getElementById('status').innerHTML = 
+                    `<div style="color: #ef4444;">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
