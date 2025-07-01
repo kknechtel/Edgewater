@@ -83,9 +83,11 @@ const HomeView = ({ setActiveTab }) => {
       
       // Load band events from bandGuideData (same as calendar)
       const bandEvents = [];
+      console.log('🎵 Loading band events from bandGuideData...');
       bandGuideData.categories.forEach(category => {
         category.bands.forEach(band => {
           if (band.date) {
+            console.log(`🎵 Processing band: ${band.name}, date: ${band.date}`);
             const dates = parseBandDates(band.date);
             const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
             
@@ -101,12 +103,14 @@ const HomeView = ({ setActiveTab }) => {
                   event_type: 'concert',
                   source: 'band'
                 };
+                console.log(`🎵 Created band event:`, bandEvent);
                 bandEvents.push(bandEvent);
               }
             });
           }
         });
       });
+      console.log(`🎵 Total band events: ${bandEvents.length}`);
 
       // Combine all events
       const allEvents = [...apiEvents, ...bandEvents];

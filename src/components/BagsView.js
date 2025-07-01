@@ -1197,7 +1197,7 @@ const BagsView = () => {
                 <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.25rem', color: '#374151' }}>
                   💰 In Hole (3pts each)
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
                   <button
                     onClick={() => setThrowState(prev => ({ 
                       ...prev, 
@@ -1207,26 +1207,33 @@ const BagsView = () => {
                       backgroundColor: '#ef4444',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '0.25rem',
-                      width: '2rem',
-                      height: '2rem',
-                      fontSize: '1rem',
-                      cursor: 'pointer'
+                      borderRadius: '0.75rem',
+                      width: '4rem',
+                      height: '4rem',
+                      fontSize: '2rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                   >
                     -
                   </button>
-                  <span style={{ 
-                    minWidth: '3rem', 
+                  <div style={{ 
+                    minWidth: '5rem', 
                     textAlign: 'center', 
-                    fontSize: '1.125rem', 
-                    fontWeight: '600',
-                    padding: '0.5rem',
+                    fontSize: '2.5rem', 
+                    fontWeight: '700',
+                    padding: '1rem',
                     backgroundColor: 'white',
-                    borderRadius: '0.25rem'
+                    borderRadius: '0.75rem',
+                    border: '3px solid #10b981',
+                    color: '#10b981'
                   }}>
                     {throwState[`${team}InHole`]}
-                  </span>
+                  </div>
                   <button
                     onClick={() => setThrowState(prev => ({ 
                       ...prev, 
@@ -1236,11 +1243,16 @@ const BagsView = () => {
                       backgroundColor: '#10b981',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '0.25rem',
-                      width: '2rem',
-                      height: '2rem',
-                      fontSize: '1rem',
-                      cursor: 'pointer'
+                      borderRadius: '0.75rem',
+                      width: '4rem',
+                      height: '4rem',
+                      fontSize: '2rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                   >
                     +
@@ -1252,7 +1264,7 @@ const BagsView = () => {
                 <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.25rem', color: '#374151' }}>
                   🪵 On Board (1pt each)
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
                   <button
                     onClick={() => setThrowState(prev => ({ 
                       ...prev, 
@@ -1262,40 +1274,52 @@ const BagsView = () => {
                       backgroundColor: '#ef4444',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '0.25rem',
-                      width: '2rem',
-                      height: '2rem',
-                      fontSize: '1rem',
-                      cursor: 'pointer'
+                      borderRadius: '0.75rem',
+                      width: '4rem',
+                      height: '4rem',
+                      fontSize: '2rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                   >
                     -
                   </button>
-                  <span style={{ 
-                    minWidth: '3rem', 
+                  <div style={{ 
+                    minWidth: '5rem', 
                     textAlign: 'center', 
-                    fontSize: '1.125rem', 
-                    fontWeight: '600',
-                    padding: '0.5rem',
+                    fontSize: '2.5rem', 
+                    fontWeight: '700',
+                    padding: '1rem',
                     backgroundColor: 'white',
-                    borderRadius: '0.25rem'
+                    borderRadius: '0.75rem',
+                    border: '3px solid #f59e0b',
+                    color: '#f59e0b'
                   }}>
                     {throwState[`${team}OnBoard`]}
-                  </span>
+                  </div>
                   <button
                     onClick={() => setThrowState(prev => ({ 
                       ...prev, 
                       [`${team}OnBoard`]: Math.min(4, prev[`${team}OnBoard`] + 1) 
                     }))}
                     style={{
-                      backgroundColor: '#10b981',
+                      backgroundColor: '#f59e0b',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '0.25rem',
-                      width: '2rem',
-                      height: '2rem',
-                      fontSize: '1rem',
-                      cursor: 'pointer'
+                      borderRadius: '0.75rem',
+                      width: '4rem',
+                      height: '4rem',
+                      fontSize: '2rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                   >
                     +
@@ -1337,34 +1361,38 @@ const BagsView = () => {
         })()}
       </div>
 
-      {/* Action Buttons - One-Handed Friendly */}
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
+      {/* Action Buttons - Beer-Friendly Large Buttons */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}>
         <button
           onClick={submitRound}
           style={{
-            flex: 1,
+            width: '100%',
             backgroundColor: '#0891b2',
             color: 'white',
             border: 'none',
-            borderRadius: '0.75rem',
-            padding: '1rem 1.5rem',
-            fontSize: '1.125rem',
+            borderRadius: '1rem',
+            padding: '1.5rem 2rem',
+            fontSize: '1.5rem',
             fontWeight: '700',
             cursor: 'pointer',
-            minHeight: '56px',
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-            transition: 'all 0.2s'
+            minHeight: '80px',
+            boxShadow: '0 8px 16px -4px rgba(8, 145, 178, 0.3)',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'scale(1.02)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.1)';
+            e.currentTarget.style.boxShadow = '0 12px 24px -6px rgba(8, 145, 178, 0.4)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
+            e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(8, 145, 178, 0.3)';
           }}
         >
-          ✅ Submit Round
+          🍻 Submit Round
         </button>
         
         <button
@@ -1377,18 +1405,24 @@ const BagsView = () => {
             });
           }}
           style={{
+            width: '100%',
             backgroundColor: '#6b7280',
             color: 'white',
             border: 'none',
-            borderRadius: '0.75rem',
-            padding: '1rem',
-            fontSize: '1rem',
-            fontWeight: '500',
+            borderRadius: '1rem',
+            padding: '1rem 2rem',
+            fontSize: '1.25rem',
+            fontWeight: '600',
             cursor: 'pointer',
-            minWidth: '80px'
+            minHeight: '60px',
+            boxShadow: '0 4px 8px -2px rgba(107, 114, 128, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
           }}
         >
-          Clear
+          🔄 Clear Round
         </button>
       </div>
     </div>
