@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchWeatherData, fetchSurfReport } from '../services/weatherService';
 import { rsvpService } from '../services/rsvpService';
 import { eventService } from '../services/api';
+import HomeEventsSection from './HomeEventsSection';
 
 const HomeView = ({ setActiveTab }) => {
   console.log('HomeView mounted, setActiveTab:', typeof setActiveTab);
@@ -69,6 +70,33 @@ const HomeView = ({ setActiveTab }) => {
       setUpcomingEvents(enrichedEvents);
     } catch (error) {
       console.error('Error loading events:', error);
+      
+      // Fallback to demo events when backend is unavailable
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      
+      const fallbackEvents = [
+        {
+          id: 'demo-1',
+          title: 'Summer Beach Concert',
+          event_date: tomorrow.toISOString().split('T')[0],
+          event_time: '6:00 PM',
+          attendeeCount: 24,
+          userRsvp: false
+        },
+        {
+          id: 'demo-2', 
+          title: 'Bags Tournament',
+          event_date: nextWeek.toISOString().split('T')[0],
+          event_time: '2:00 PM',
+          attendeeCount: 16,
+          userRsvp: false
+        }
+      ];
+      
+      setUpcomingEvents(fallbackEvents);
     }
   };
 
@@ -505,98 +533,14 @@ const HomeView = ({ setActiveTab }) => {
         </div>
 
 
-        {/* Events Section */}
-        <div style={styles.card}>
-          <h2 
-            style={{...styles.cardTitle, cursor: 'pointer'}}
-            onClick={() => {
-              console.log('Title clicked, calling setActiveTab');
-              setActiveTab('calendar');
-            }}
-          >
-            <span>📅</span> Upcoming Events
-          </h2>
-          
-          {upcomingEvents.length === 0 ? (
-            <p style={{ color: '#6b7280' }}>No upcoming events scheduled</p>
-          ) : (
-            <div>
-              {upcomingEvents.map(event => (
-                <div 
-                  key={event.id} 
-                  style={{
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '0.75rem',
-                    padding: '1rem',
-                    border: '1px solid #e5e7eb',
-                    marginBottom: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onClick={() => {
-                    console.log('Event clicked, calling setActiveTab');
-                    setActiveTab('calendar');
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#e5e7eb';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'start'
-                  }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{
-                        fontSize: '1.125rem',
-                        fontWeight: '600',
-                        marginBottom: '0.25rem',
-                        color: '#111827'
-                      }}>
-                        {event.title}
-                      </h3>
-                      <p style={{
-                        fontSize: '0.875rem',
-                        color: '#4b5563'
-                      }}>
-                        {getEventDateLabel(event.event_date)} • {event.event_time || 'Time TBD'}
-                      </p>
-                      <p style={{
-                        fontSize: '0.875rem',
-                        color: '#6b7280',
-                        marginTop: '0.25rem'
-                      }}>
-                        👥 {event.attendeeCount || 0} attending
-                      </p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRsvp(event.id);
-                      }}
-                      style={{
-                        backgroundColor: event.userRsvp ? '#10b981' : '#0891b2',
-                        color: 'white',
-                        border: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '0.75rem',
-                        fontSize: '0.875rem',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        minHeight: '44px'
-                      }}
-                    >
-                      {event.userRsvp ? '✓ Going' : 'RSVP'}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Events Section - Protected in separate component */}
+        <HomeEventsSection 
+          upcomingEvents={upcomingEvents}
+          setActiveTab={setActiveTab}
+          handleRsvp={handleRsvp}
+          getEventDateLabel={getEventDateLabel}
+          styles={styles}
+        />
 
         {/* Quick Actions */}
         <div style={{
