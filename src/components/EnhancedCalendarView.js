@@ -728,7 +728,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       maxWidth: '1024px', 
       margin: '0 auto', 
       padding: '1rem',
-      background: 'linear-gradient(135deg, #87CEEB 0%, #98E4E8 50%, #FFE4B5 100%)', // Sky to sand gradient
+      background: '#E3F2FD', // Light blue background for readability
       minHeight: '100vh',
       borderRadius: '0'
     }}>
@@ -742,14 +742,18 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
         gap: '0.5rem'
       }}>
         <h1 style={{ 
-          fontSize: '2rem', 
-          fontWeight: '800', 
+          fontSize: '2.5rem', 
+          fontWeight: '900', 
           margin: 0,
-          color: '#1A365D',
-          textShadow: '2px 2px 4px rgba(255,255,255,0.8)',
-          letterSpacing: '1px'
+          color: '#000000',
+          textShadow: '3px 3px 6px rgba(255,255,255,1)',
+          letterSpacing: '2px',
+          background: '#FFFFFF',
+          padding: '1rem',
+          borderRadius: '1rem',
+          border: '4px solid #1976D2'
         }}>
-          🏖️ Beach Events
+          🏖️ BEACH EVENTS
         </h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
@@ -1113,19 +1117,15 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #FFE082 0%, #FFF3E0 100%)', // Sunny beach gradient
+      background: '#FFFFFF', // Pure white for maximum readability
       borderRadius: '1rem',
-      padding: '1rem',
-      marginBottom: '0.75rem',
+      padding: '1.5rem',
+      marginBottom: '1rem',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
-      border: '2px solid #FFD54F',
-      boxShadow: '0 8px 20px rgba(255, 183, 77, 0.2)',
-      transform: expanded ? 'scale(1.02)' : 'scale(1)',
-      ':hover': {
-        transform: 'scale(1.01)',
-        boxShadow: '0 12px 24px rgba(255, 183, 77, 0.3)'
-      }
+      border: '3px solid #2E86AB', // Strong blue border
+      boxShadow: '0 8px 24px rgba(46, 134, 171, 0.2)',
+      transform: expanded ? 'scale(1.02)' : 'scale(1)'
     }}
     onClick={onToggle}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
@@ -1146,85 +1146,86 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
         
         <div style={{ flex: 1 }}>
           <h4 style={{
-            fontSize: '1.25rem',
-            fontWeight: '700',
-            margin: '0 0 0.5rem 0',
-            color: '#1A365D', // Deep blue for excellent readability
-            textShadow: '1px 1px 2px rgba(255,255,255,0.8)'
+            fontSize: '1.5rem',
+            fontWeight: '800',
+            margin: '0 0 0.75rem 0',
+            color: '#000000', // Pure black for maximum readability
+            lineHeight: '1.3'
           }}>
             {event.title}
             {event.bandData && event.bandData.rating && (
-              <span style={{ marginLeft: '0.5rem', fontSize: '1rem', color: '#F39C12' }}>
+              <span style={{ marginLeft: '0.5rem', fontSize: '1.25rem', color: '#FF6B00' }}>
                 {'⭐'.repeat(event.bandData.rating)}
               </span>
             )}
           </h4>
           
           <div style={{
-            fontSize: '1rem',
-            color: '#2C5282', // Strong blue for readability
+            fontSize: '1.1rem',
+            color: '#000000', // Pure black for readability
             display: 'flex',
             alignItems: 'center',
             gap: '1rem',
             flexWrap: 'wrap',
-            marginBottom: '0.75rem',
-            fontWeight: '500'
+            marginBottom: '1rem',
+            fontWeight: '600'
           }}>
-            <span style={{background: 'rgba(255,255,255,0.7)', padding: '0.25rem 0.5rem', borderRadius: '0.5rem'}}>
+            <span style={{background: '#E3F2FD', padding: '0.5rem 1rem', borderRadius: '1rem', border: '2px solid #1976D2', color: '#000000'}}>
               ⏰ {event.event_time}
             </span>
-            <span style={{background: 'rgba(255,255,255,0.7)', padding: '0.25rem 0.5rem', borderRadius: '0.5rem'}}>
+            <span style={{background: '#E8F5E8', padding: '0.5rem 1rem', borderRadius: '1rem', border: '2px solid #388E3C', color: '#000000'}}>
               📍 {event.location || 'Beach Club'}
             </span>
             {event.attendees && event.attendees.length > 0 && (
-              <span style={{background: 'rgba(76, 205, 196, 0.3)', padding: '0.25rem 0.5rem', borderRadius: '0.5rem', color: '#1A365D', fontWeight: '600'}}>
+              <span style={{background: '#FFF3E0', padding: '0.5rem 1rem', borderRadius: '1rem', border: '2px solid #F57C00', color: '#000000', fontWeight: '700'}}>
                 👥 {event.attendees.length} going
               </span>
             )}
           </div>
 
-          {/* Show Attendees List */}
+          {/* Show Attendees List - Always Visible & Readable */}
           {event.attendees && event.attendees.length > 0 && (
             <div style={{
-              background: 'rgba(255,255,255,0.8)',
-              borderRadius: '0.75rem',
-              padding: '0.75rem',
-              marginBottom: '0.75rem',
-              border: '1px solid #4ECDC4'
+              background: '#F0F8FF',
+              borderRadius: '1rem',
+              padding: '1rem',
+              marginBottom: '1rem',
+              border: '3px solid #1976D2'
             }}>
               <h5 style={{
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                color: '#1A365D'
-              }}>🏖️ Who's Going:</h5>
+                fontSize: '1.1rem',
+                fontWeight: '700',
+                margin: '0 0 0.75rem 0',
+                color: '#000000'
+              }}>🏖️ Who's Coming:</h5>
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '0.5rem'
+                gap: '0.75rem'
               }}>
                 {event.attendees.map((attendee, index) => (
                   <span
                     key={attendee.userId || index}
                     style={{
-                      fontSize: '0.875rem',
-                      padding: '0.375rem 0.75rem',
-                      backgroundColor: '#4ECDC4',
-                      color: 'white',
-                      borderRadius: '1rem',
-                      fontWeight: '500',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      fontSize: '1rem',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#1976D2',
+                      color: '#FFFFFF',
+                      borderRadius: '1.5rem',
+                      fontWeight: '600',
+                      boxShadow: '0 3px 6px rgba(0,0,0,0.2)',
+                      border: '2px solid #0D47A1'
                     }}
                   >
-                    {attendee.userName}
+                    👤 {attendee.userName}
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* RSVP Button - Always Visible & Vibrant */}
-          <div style={{ marginTop: '0.75rem' }}>
+          {/* RSVP Button - MASSIVE & READABLE */}
+          <div style={{ marginTop: '1rem' }}>
             {currentUser ? (
               <button
                 onClick={(e) => {
@@ -1232,24 +1233,26 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
                   onRSVP();
                 }}
                 style={{
-                  padding: '0.75rem 1.5rem',
+                  padding: '1rem 2rem',
                   backgroundColor: rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' 
-                    ? '#4ECDC4' 
-                    : '#FF6B6B',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '2rem',
-                  fontSize: '1rem',
-                  fontWeight: '700',
+                    ? '#2E7D32' 
+                    : '#D32F2F',
+                  color: '#FFFFFF',
+                  border: '3px solid #000000',
+                  borderRadius: '1rem',
+                  fontSize: '1.2rem',
+                  fontWeight: '800',
                   cursor: 'pointer',
-                  marginRight: '0.75rem',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  marginRight: '1rem',
+                  boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
                   transition: 'all 0.3s ease',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '1px',
+                  width: 'auto',
+                  minWidth: '200px'
                 }}
               >
-                {rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' ? '🏖️ I\'m Going!' : '🌊 RSVP Now!'}
+                {rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' ? '✅ I\'M GOING!' : '🎯 RSVP NOW!'}
               </button>
             ) : (
               <button
@@ -1258,65 +1261,117 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
                   window.location.href = '/login';
                 }}
                 style={{
+                  padding: '1rem 2rem',
+                  backgroundColor: '#FF9800',
+                  color: '#FFFFFF',
+                  border: '3px solid #000000',
+                  borderRadius: '1rem',
+                  fontSize: '1.2rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  marginRight: '1rem',
+                  boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
+                  transition: 'all 0.3s ease',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  minWidth: '200px'
+                }}
+              >
+                🔐 LOGIN TO JOIN!
+              </button>
+            )}
+            {event.bandData && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggle();
+                }}
+                style={{
                   padding: '0.75rem 1.5rem',
-                  backgroundColor: '#F39C12',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '2rem',
+                  backgroundColor: '#FFFFFF',
+                  color: '#000000',
+                  border: '3px solid #1976D2',
+                  borderRadius: '1rem',
                   fontSize: '1rem',
                   fontWeight: '700',
                   cursor: 'pointer',
-                  marginRight: '0.75rem',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  transition: 'all 0.3s ease',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  transition: 'all 0.3s ease'
                 }}
               >
-                🏄‍♂️ Login to Join!
+                {expanded ? '📖 LESS INFO' : '📖 BAND INFO'} 
               </button>
             )}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggle();
-              }}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: 'rgba(255,255,255,0.8)',
-                color: '#1A365D',
-                border: '2px solid #45B7D1',
-                borderRadius: '1rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {expanded ? '📝 Less Info' : '📝 More Info'} 
-            </button>
           </div>
           
           {expanded && (
             <div style={{
-              marginTop: '0.75rem',
-              paddingTop: '0.75rem',
-              borderTop: '2px solid #4ECDC4'
+              marginTop: '1rem',
+              paddingTop: '1rem',
+              borderTop: '4px solid #1976D2',
+              background: '#F5F5F5',
+              padding: '1rem',
+              borderRadius: '1rem',
+              border: '2px solid #000000'
             }}>
               {event.description && (
                 <p style={{
-                  fontSize: '1rem',
-                  color: '#1A365D',
-                  marginBottom: '0.75rem',
+                  fontSize: '1.1rem',
+                  color: '#000000',
+                  marginBottom: '1rem',
                   lineHeight: '1.6',
-                  fontWeight: '500',
-                  background: 'rgba(255,255,255,0.8)',
-                  padding: '0.75rem',
-                  borderRadius: '0.75rem',
-                  border: '1px solid #FFD54F'
+                  fontWeight: '600',
+                  background: '#FFFFFF',
+                  padding: '1rem',
+                  borderRadius: '1rem',
+                  border: '2px solid #1976D2'
                 }}>
                   {event.description}
                 </p>
+              )}
+
+              {event.bandData && (
+                <div style={{
+                  background: '#FFFFFF',
+                  padding: '1rem',
+                  borderRadius: '1rem',
+                  border: '2px solid #FF6B00',
+                  marginBottom: '1rem'
+                }}>
+                  <h5 style={{
+                    fontSize: '1.2rem',
+                    fontWeight: '800',
+                    margin: '0 0 0.5rem 0',
+                    color: '#000000'
+                  }}>🎸 Band Details:</h5>
+                  <p style={{
+                    fontSize: '1rem',
+                    color: '#000000',
+                    margin: '0.5rem 0',
+                    fontWeight: '600'
+                  }}>
+                    <strong>Style:</strong> {event.bandData.vibe}
+                  </p>
+                  {event.bandData.reviews && (
+                    <p style={{
+                      fontSize: '1rem',
+                      color: '#000000',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      <strong>Reviews:</strong> {event.bandData.reviews}
+                    </p>
+                  )}
+                  {event.bandData.socialMedia && (
+                    <p style={{
+                      fontSize: '1rem',
+                      color: '#000000',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      <strong>Follow:</strong> {event.bandData.socialMedia}
+                    </p>
+                  )}
+                </div>
               )}
               
               {event.bandData && (
