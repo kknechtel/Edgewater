@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 
 const GoogleSignIn = ({ onSuccess, onError }) => {
   useEffect(() => {
+    console.log('Google Client ID:', '951154910259-j8tncrdvanjn5d7drn167mvjf56tln3r.apps.googleusercontent.com');
+    console.log('Current domain:', window.location.hostname);
+    
     if (window.google) {
       window.google.accounts.id.initialize({
-        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || '951154910259-j8tncrdvanjn5d7drn167mvjf56tln3r.apps.googleusercontent.com',
+        client_id: '951154910259-j8tncrdvanjn5d7drn167mvjf56tln3r.apps.googleusercontent.com',
         callback: handleCredentialResponse,
       });
 
