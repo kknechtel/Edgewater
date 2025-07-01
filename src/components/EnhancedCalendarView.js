@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { eventService } from '../services/api';
 import { bandGuideData } from '../data/bandGuideData';
+import { rsvpService } from '../services/rsvpService';
+import { notificationService } from '../services/notificationService';
+import { commentsService } from '../services/commentsService';
 
 const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
   const [events, setEvents] = useState([]);
@@ -13,6 +16,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
   const [expandedEvent, setExpandedEvent] = useState(null);
   const [showBandDetails, setShowBandDetails] = useState(null);
   const [showTournamentModal, setShowTournamentModal] = useState(false);
+  const [commentInputs, setCommentInputs] = useState({});
   const { user } = useAuth();
 
   // Tournament form state
@@ -116,7 +120,17 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       
       // Combine all events
       const allEvents = [...apiEvents, ...bandEvents, ...tournamentEvents];
-      setEvents(allEvents);
+      
+      // Enrich events with attendee data from RSVP service and comment counts
+      const enrichedEvents = allEvents.map(event => ({
+        ...event,
+        attendees: rsvpService.getEventAttendees(event.id),
+        attendeeCount: rsvpService.getAttendeeCount(event.id),
+        comments: commentsService.getEventComments(event.id),
+        commentCount: commentsService.getCommentCount(event.id)
+      }));
+      
+      setEvents(enrichedEvents);
     } catch (error) {
       console.error('Error loading events:', error);
     } finally {
@@ -538,7 +552,12 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
                     }}
                     onEdit={() => handleEditEvent(event)}
                     onDelete={() => handleDeleteEvent(event.id)}
+                    onRSVP={() => handleRSVP(event)}
+                    onAddComment={() => handleAddComment(event.id)}
+                    commentInput={commentInputs[event.id] || ''}
+                    onCommentInputChange={(value) => setCommentInputs({ ...commentInputs, [event.id]: value })}
                     isOwner={user?.id === event.creator_id}
+                    currentUser={user}
                   />
                 ))}
               </div>
@@ -592,7 +611,12 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
                     }}
                     onEdit={() => handleEditEvent(event)}
                     onDelete={() => handleDeleteEvent(event.id)}
+                    onRSVP={() => handleRSVP(event)}
+                    onAddComment={() => handleAddComment(event.id)}
+                    commentInput={commentInputs[event.id] || ''}
+                    onCommentInputChange={(value) => setCommentInputs({ ...commentInputs, [event.id]: value })}
                     isOwner={user?.id === event.creator_id}
+                    currentUser={user}
                   />
                 ))}
               </div>
@@ -636,6 +660,63 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       mode: 'create',
       event: null
     });
+  };
+
+  const handleRSVP = async (event) => {
+    if (!user) {
+      notificationService.showToast('Please log in to RSVP', 'warning');
+      return;
+    }
+
+    const currentStatus = rsvpService.getUserRSVPStatus(event.id, user.id);
+    const newStatus = currentStatus === 'going' ? 'none' : 'going';
+    
+    const result = rsvpService.rsvpToEvent(
+      event.id, 
+      user.id, 
+      user.first_name || user.display_name || 'Anonymous',
+      newStatus
+    );
+
+    if (result.success) {
+      notificationService.showToast(
+        newStatus === 'going' ? `You're going to ${event.title}!` : `Removed RSVP for ${event.title}`,
+        'success'
+      );
+      
+      // Refresh events to show updated attendee count
+      await loadEvents();
+    } else {
+      notificationService.showToast('Error updating RSVP', 'error');
+    }
+  };
+
+  const handleAddComment = async (eventId) => {
+    if (!user) {
+      notificationService.showToast('Please log in to comment', 'warning');
+      return;
+    }
+
+    const comment = commentInputs[eventId]?.trim();
+    if (!comment) {
+      notificationService.showToast('Please enter a comment', 'warning');
+      return;
+    }
+
+    const result = commentsService.addComment(
+      eventId,
+      user.id,
+      user.first_name || user.display_name || 'Anonymous',
+      comment
+    );
+
+    if (result.success) {
+      notificationService.showToast('Comment added!', 'success');
+      setCommentInputs({ ...commentInputs, [eventId]: '' });
+      await loadEvents(); // Refresh to show new comment
+    } else {
+      notificationService.showToast('Error adding comment', 'error');
+    }
   };
 
   return (
@@ -987,7 +1068,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
 };
 
 // Event Card Component
-const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, isOwner }) => {
+const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddComment, commentInput, onCommentInputChange, isOwner, currentUser }) => {
   const getEventTypeColor = (type) => {
     const colors = {
       party: '#fbbf24',
@@ -1099,12 +1180,176 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, isOwner }) => 
                 </div>
               )}
               
+              {/* RSVP Section */}
+              {event.attendees && event.attendees.length > 0 && (
+                <div style={{
+                  marginTop: '0.75rem',
+                  padding: '0.75rem',
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '0.5rem'
+                }}>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem',
+                    color: '#374151'
+                  }}>
+                    👥 {event.attendees.length} Attending
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem',
+                    marginBottom: '0.5rem'
+                  }}>
+                    {event.attendees.map((attendee, index) => (
+                      <span
+                        key={attendee.userId || index}
+                        style={{
+                          fontSize: '0.75rem',
+                          padding: '0.25rem 0.5rem',
+                          backgroundColor: 'white',
+                          borderRadius: '0.375rem',
+                          color: '#4b5563'
+                        }}
+                      >
+                        {attendee.userName}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Comments Section */}
+              <div style={{
+                marginTop: '0.75rem',
+                padding: '0.75rem',
+                backgroundColor: '#fef3c7',
+                borderRadius: '0.5rem'
+              }}>
+                <p style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  marginBottom: '0.5rem',
+                  color: '#78350f'
+                }}>
+                  💬 Comments {event.commentCount > 0 && `(${event.commentCount})`}
+                </p>
+                
+                {/* Display existing comments */}
+                {event.comments && event.comments.length > 0 && (
+                  <div style={{
+                    marginBottom: '0.75rem',
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}>
+                    {event.comments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        style={{
+                          backgroundColor: 'white',
+                          padding: '0.5rem',
+                          borderRadius: '0.375rem',
+                          marginBottom: '0.5rem',
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.25rem'
+                        }}>
+                          <span style={{ fontWeight: '600', color: '#374151' }}>
+                            {comment.userName}
+                          </span>
+                          <span style={{ color: '#6b7280', fontSize: '0.625rem' }}>
+                            {new Date(comment.timestamp).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, color: '#4b5563' }}>
+                          {comment.comment}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Add comment input */}
+                {currentUser && (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      value={commentInput}
+                      onChange={(e) => onCommentInputChange(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          onAddComment();
+                        }
+                      }}
+                      placeholder="Add a comment..."
+                      style={{
+                        flex: 1,
+                        padding: '0.5rem',
+                        border: '1px solid #fbbf24',
+                        borderRadius: '0.375rem',
+                        fontSize: '0.75rem',
+                        outline: 'none'
+                      }}
+                    />
+                    <button
+                      onClick={onAddComment}
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        backgroundColor: '#fbbf24',
+                        color: '#78350f',
+                        border: 'none',
+                        borderRadius: '0.375rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Post
+                    </button>
+                  </div>
+                )}
+              </div>
+              
               {/* Action Buttons */}
               <div style={{
                 display: 'flex',
                 gap: '0.5rem',
-                marginTop: '0.75rem'
+                marginTop: '0.75rem',
+                flexWrap: 'wrap'
               }}>
+                {/* RSVP Button */}
+                {currentUser && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRSVP();
+                    }}
+                    style={{
+                      padding: '0.375rem 0.75rem',
+                      backgroundColor: rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' 
+                        ? '#10b981' 
+                        : '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
+                  >
+                    {rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' ? '✓ Going' : '+ RSVP'}
+                  </button>
+                )}
+                
                 {isOwner && !event.source && (
                   <>
                     <button

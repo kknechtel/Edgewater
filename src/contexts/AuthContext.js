@@ -115,6 +115,13 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(googleData),
       });
 
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error('Non-JSON response:', await response.text());
+        return { success: false, error: 'Server error - invalid response format' };
+      }
+
       const data = await response.json();
 
       if (response.ok && data.access_token) {
