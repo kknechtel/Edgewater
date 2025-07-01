@@ -372,6 +372,65 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
               </p>
             </div>
 
+            {/* RSVP Section for Band Events */}
+            <div style={{
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '0.75rem',
+              padding: '1rem',
+              marginTop: '1rem'
+            }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#111827' }}>
+                Event RSVP
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                    {band.date} at {band.time} • Beach Stage
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                    👥 {rsvpService.getAttendeeCount(`band-${band.name}`) || 0} attending
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      alert('Please log in to RSVP');
+                      return;
+                    }
+                    const eventId = `band-${band.name}`;
+                    const currentRsvp = rsvpService.getUserRSVPStatus(eventId, user.id);
+                    const newStatus = currentRsvp === 'going' ? 'none' : 'going';
+                    
+                    rsvpService.rsvpToEvent(
+                      eventId,
+                      user.id,
+                      user.display_name || user.first_name || 'Anonymous',
+                      newStatus
+                    );
+                    
+                    // Force re-render by updating state
+                    setShowBandDetails({...band});
+                  }}
+                  style={{
+                    backgroundColor: user && rsvpService.getUserRSVPStatus(`band-${band.name}`, user.id) === 'going' 
+                      ? '#10b981' : '#0891b2',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    minHeight: '44px'
+                  }}
+                >
+                  {user && rsvpService.getUserRSVPStatus(`band-${band.name}`, user.id) === 'going' 
+                    ? '✓ Going' : 'RSVP'}
+                </button>
+              </div>
+            </div>
+
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
               {band.socialMedia && band.socialMedia.includes('facebook') && (
