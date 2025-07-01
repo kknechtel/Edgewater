@@ -12,7 +12,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('month');
+  const [viewMode, setViewMode] = useState('list');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [expandedEvent, setExpandedEvent] = useState(null);
   const [showBandDetails, setShowBandDetails] = useState(null);
@@ -132,6 +132,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
         commentCount: commentsService.getCommentCount(event.id)
       }));
       
+      console.log('Loaded events:', enrichedEvents.length, enrichedEvents);
       setEvents(enrichedEvents);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -1157,6 +1158,7 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
 
           {/* RSVP Button - Always Visible */}
           <div style={{ marginTop: '0.5rem' }}>
+            {console.log('EventCard rendering RSVP for:', event.title, 'User:', currentUser?.email)}
             {currentUser ? (
               <button
                 onClick={(e) => {
