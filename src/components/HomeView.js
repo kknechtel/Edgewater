@@ -12,6 +12,7 @@ const HomeView = ({ setActiveTab }) => {
   const [surfData, setSurfData] = useState(null);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [recentSightings, setRecentSightings] = useState(0);
+  const [activeWeatherTab, setActiveWeatherTab] = useState('current');
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -230,164 +231,147 @@ const HomeView = ({ setActiveTab }) => {
 
       {/* Main Content */}
       <div style={styles.content}>
-        {/* Weather Card */}
+        {/* Weather Card with Tabs */}
         <div style={styles.card}>
           <h2 style={styles.cardTitle}>
             <span>☀️</span> Weather & Surf
           </h2>
           
+          {/* Weather Tabs */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '1rem',
-            marginBottom: '1.25rem'
-          }}>
-            <div style={{
-              backgroundColor: '#ecfeff',
-              borderRadius: '0.75rem',
-              padding: '1rem',
-              border: '1px solid rgba(8, 145, 178, 0.2)'
-            }}>
-              <div style={{
-                fontSize: '2.5rem',
-                fontWeight: '700',
-                color: '#0891b2'
-              }}>
-                {weather?.temp || '--'}°
-              </div>
-              <div style={{
-                fontSize: '1rem',
-                color: '#4b5563'
-              }}>
-                {weather?.condition || 'Loading...'}
-              </div>
-              <div style={{
-                fontSize: '0.875rem',
-                color: '#6b7280',
-                marginTop: '0.25rem'
-              }}>
-                Feels like {weather?.feelsLike || '--'}°
-              </div>
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem'
-            }}>
-              <div style={{
-                backgroundColor: '#f3f4f6',
-                borderRadius: '0.5rem',
-                padding: '0.5rem 0.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.875rem',
-                color: '#4b5563'
-              }}>
-                <span>💨</span>
-                <span>{weather?.wind || 'Loading...'}</span>
-              </div>
-              <div style={{
-                backgroundColor: '#f3f4f6',
-                borderRadius: '0.5rem',
-                padding: '0.5rem 0.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.875rem',
-                color: '#4b5563'
-              }}>
-                <span>💧</span>
-                <span>{weather?.humidity || '--'}% humidity</span>
-              </div>
-              {weather?.uvIndex >= 7 && (
-                <div style={{
-                  backgroundColor: '#fef3c7',
-                  color: '#f59e0b',
-                  fontWeight: '600',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.875rem'
-                }}>
-                  <span>☀️</span>
-                  <span>UV Index: {weather.uvIndex}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Surf Report */}
-          <div style={{
+            display: 'flex',
             backgroundColor: '#f3f4f6',
             borderRadius: '0.75rem',
-            padding: '1rem',
-            border: '1px solid #e5e7eb'
+            padding: '0.25rem',
+            marginBottom: '1rem',
+            gap: '0.25rem'
           }}>
-            <h3 style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              marginBottom: '0.75rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: '#111827'
-            }}>
-              <span>🏄</span> Surf Conditions
-            </h3>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '0.75rem'
-            }}>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Waves</div>
-                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#0891b2' }}>
-                  {surfData?.waveHeight || 'Loading...'}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Quality</div>
-                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#10b981' }}>
-                  {surfData?.quality || 'Loading...'}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Water Temp</div>
-                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
-                  {surfData?.waterTemp || '--'}°F
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Crowd</div>
-                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
-                  {surfData?.crowd || 'Loading...'}
-                </div>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '0.75rem',
-              padding: '0.5rem',
-              backgroundColor: '#ffffff',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-              color: '#4b5563',
-              textAlign: 'center'
-            }}>
-              {surfData?.tide || 'Tide info loading...'}
-            </div>
+            {[
+              { id: 'current', label: 'Current', icon: '☀️' },
+              { id: 'hourly', label: 'Hourly', icon: '🕐' },
+              { id: 'daily', label: '7-Day', icon: '📆' },
+              { id: 'surf', label: 'Surf', icon: '🏄' }
+            ].map(tab => {
+              const isActive = activeWeatherTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  style={{
+                    flex: 1,
+                    padding: '0.5rem 0.75rem',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    backgroundColor: isActive ? '#ffffff' : 'transparent',
+                    color: isActive ? '#0891b2' : '#6b7280',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    transition: 'all 0.2s',
+                    boxShadow: isActive ? '0 1px 3px 0 rgb(0 0 0 / 0.1)' : 'none'
+                  }}
+                  onClick={() => setActiveWeatherTab(tab.id)}
+                >
+                  <span style={{ fontSize: '1rem' }}>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
-        </div>
 
-        {/* Hourly Forecast */}
-        {weather?.hourly && (
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>
-              <span>🕐</span> Hourly Forecast
-            </h2>
+          {/* Weather Content Based on Active Tab */}
+          {activeWeatherTab === 'current' && (
+            <>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '1rem',
+                marginBottom: '1.25rem'
+              }}>
+                <div style={{
+                  backgroundColor: '#ecfeff',
+                  borderRadius: '0.75rem',
+                  padding: '1rem',
+                  border: '1px solid rgba(8, 145, 178, 0.2)'
+                }}>
+                  <div style={{
+                    fontSize: '2.5rem',
+                    fontWeight: '700',
+                    color: '#0891b2'
+                  }}>
+                    {weather?.temp || '--'}°
+                  </div>
+                  <div style={{
+                    fontSize: '1rem',
+                    color: '#4b5563'
+                  }}>
+                    {weather?.condition || 'Loading...'}
+                  </div>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: '#6b7280',
+                    marginTop: '0.25rem'
+                  }}>
+                    Feels like {weather?.feelsLike || '--'}°
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  <div style={{
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '0.5rem',
+                    padding: '0.5rem 0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.875rem',
+                    color: '#4b5563'
+                  }}>
+                    <span>💨</span>
+                    <span>{weather?.wind || 'Loading...'}</span>
+                  </div>
+                  <div style={{
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '0.5rem',
+                    padding: '0.5rem 0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.875rem',
+                    color: '#4b5563'
+                  }}>
+                    <span>💧</span>
+                    <span>{weather?.humidity || '--'}% humidity</span>
+                  </div>
+                  {weather?.uvIndex >= 7 && (
+                    <div style={{
+                      backgroundColor: '#fef3c7',
+                      color: '#f59e0b',
+                      fontWeight: '600',
+                      borderRadius: '0.5rem',
+                      padding: '0.5rem 0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontSize: '0.875rem'
+                    }}>
+                      <span>☀️</span>
+                      <span>UV Index: {weather.uvIndex}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeWeatherTab === 'hourly' && weather?.hourly && (
             <div style={{
               display: 'flex',
               overflowX: 'auto',
@@ -398,68 +382,128 @@ const HomeView = ({ setActiveTab }) => {
               {weather.hourly.slice(0, 12).map((hour, index) => (
                 <div key={index} style={{
                   backgroundColor: '#f3f4f6',
-                  borderRadius: '0.5rem',
-                  padding: '0.75rem',
-                  minWidth: '80px',
+                  borderRadius: '0.75rem',
+                  padding: '1rem',
+                  minWidth: '100px',
                   textAlign: 'center',
                   border: '1px solid #e5e7eb'
                 }}>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.5rem' }}>
                     {hour.time}
                   </div>
-                  <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
                     {hour.icon}
                   </div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
                     {hour.temp}°
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                    {hour.condition}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* 7-Day Forecast */}
-        {weather?.daily && (
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>
-              <span>📆</span> 7-Day Forecast
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {activeWeatherTab === 'daily' && weather?.daily && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {weather.daily.map((day, index) => (
                 <div key={index} style={{
                   backgroundColor: '#f3f4f6',
-                  borderRadius: '0.5rem',
-                  padding: '0.75rem 1rem',
+                  borderRadius: '0.75rem',
+                  padding: '1rem 1.25rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   border: '1px solid #e5e7eb'
                 }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ fontSize: '1.25rem' }}>{day.icon}</div>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ fontSize: '1.5rem' }}>{day.icon}</div>
                     <div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>
+                      <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
                         {day.day}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                         {day.condition}
                       </div>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>
+                    <span style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
                       {day.high}°
                     </span>
-                    <span style={{ fontSize: '0.875rem', color: '#6b7280', marginLeft: '0.5rem' }}>
+                    <span style={{ fontSize: '1rem', color: '#6b7280', marginLeft: '0.75rem' }}>
                       {day.low}°
                     </span>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+
+          {activeWeatherTab === 'surf' && (
+            <div style={{
+              backgroundColor: '#f3f4f6',
+              borderRadius: '0.75rem',
+              padding: '1rem',
+              border: '1px solid #e5e7eb'
+            }}>
+              <h3 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                marginBottom: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: '#111827'
+              }}>
+                <span>🏄</span> Surf Conditions
+              </h3>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '0.75rem'
+              }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Waves</div>
+                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#0891b2' }}>
+                    {surfData?.waveHeight || 'Loading...'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Quality</div>
+                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#10b981' }}>
+                    {surfData?.quality || 'Loading...'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Water Temp</div>
+                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
+                    {surfData?.waterTemp || '--'}°F
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Crowd</div>
+                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
+                    {surfData?.crowd || 'Loading...'}
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                marginTop: '0.75rem',
+                padding: '0.5rem',
+                backgroundColor: '#ffffff',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                color: '#4b5563',
+                textAlign: 'center'
+              }}>
+                {surfData?.tide || 'Tide info loading...'}
+              </div>
+            </div>
+          )}
+        </div>
+
 
         {/* Events Section */}
         <div style={styles.card}>
