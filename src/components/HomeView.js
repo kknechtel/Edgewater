@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { bandGuideData } from '../data/bandGuideData';
+import { rsvpService } from '../services/rsvpService';
+import { commentsService } from '../services/commentsService';
+import { eventService } from '../services/api';
 
 const HomeView = ({ setActiveTab }) => {
   const { user } = useAuth();
@@ -36,12 +40,109 @@ const HomeView = ({ setActiveTab }) => {
     }
   };
 
-  const loadNextEvent = () => {
-    const events = JSON.parse(localStorage.getItem('beach_events') || '[]');
-    const upcoming = events
-      .filter(e => new Date(e.event_date) >= new Date())
-      .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))[0];
-    setNextEvent(upcoming);
+  const parseBandDates = (dateString) => {
+    const currentYear = new Date().getFullYear();
+    const dates = dateString.split(',').map(d => d.trim());
+    return dates.map(dateStr => {
+      // Parse "June 21" or "July 17" or "September 6" format
+      const parts = dateStr.split(' ');
+      if (parts.length >= 2) {
+        const month = parts[0];
+        const day = parts[1];
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const monthIndex = monthNames.indexOf(month);
+        if (monthIndex !== -1 && day) {
+          const parsedDate = new Date(currentYear, monthIndex, parseInt(day));
+          return parsedDate;
+        }
+      }
+      return null;
+    }).filter(date => date !== null);
+  };
+
+  const loadNextEvent = async () => {
+    try {
+      // Load events from multiple sources
+      let allEvents = [];
+      
+      // Load events from backend API  
+      try {
+        const response = await eventService.getAllEvents();
+        const apiEvents = Array.isArray(response) ? response : (response.events || response.data || []);
+        allEvents = [...allEvents, ...apiEvents];
+      } catch (error) {
+        console.log('API events failed, using other sources:', error);
+      }
+      
+      // Load band events from bandGuideData
+      const bandEvents = [];
+      bandGuideData.categories.forEach(category => {
+        category.bands.forEach(band => {
+          if (band.date) {
+            const dates = parseBandDates(band.date);
+            const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
+            
+            dates.forEach((date, index) => {
+              if (date) {
+                const bandEvent = {
+                  id: `band-${band.name}-${date.getTime()}`,
+                  title: band.name,
+                  description: band.description,
+                  event_date: date.toISOString().split('T')[0],
+                  event_time: times[index] || times[0],
+                  location: 'Beach Stage',
+                  event_type: 'concert',
+                  created_by: { email: 'system' },
+                  source: 'band',
+                  bandData: band,
+                  category: category.name
+                };
+                bandEvents.push(bandEvent);
+              }
+            });
+          }
+        });
+      });
+      
+      // Load bags tournament events from localStorage
+      const savedTournaments = localStorage.getItem('bags_tournaments');
+      const tournamentEvents = savedTournaments ? JSON.parse(savedTournaments)
+        .filter(t => t.date)
+        .map(tournament => ({
+          id: `tournament-${tournament.id}`,
+          title: tournament.name,
+          description: tournament.description || `${tournament.type}-player Bags Tournament`,
+          event_date: tournament.date,
+          event_time: tournament.time || '2:00 PM',
+          location: 'Bags Court',
+          event_type: 'tournament',
+          created_by: { email: tournament.createdBy || 'system' },
+          source: 'bags',
+          tournamentData: tournament
+        })) : [];
+      
+      // Combine all events
+      allEvents = [...allEvents, ...bandEvents, ...tournamentEvents];
+      
+      // Enrich events with attendee data from RSVP service
+      const enrichedEvents = allEvents.map(event => ({
+        ...event,
+        attendees: rsvpService.getEventAttendees(event.id),
+        attendeeCount: rsvpService.getAttendeeCount(event.id)
+      }));
+      
+      // Get next upcoming event
+      const upcoming = enrichedEvents
+        .filter(e => new Date(e.event_date) >= new Date())
+        .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))[0];
+      
+      setNextEvent(upcoming);
+      console.log('Loaded next event:', upcoming);
+    } catch (error) {
+      console.error('Error loading next event:', error);
+      setNextEvent(null);
+    }
   };
 
   const loadRecentPhotos = () => {
