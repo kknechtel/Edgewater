@@ -4,8 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import GoogleSignIn from '../../GoogleSignIn';
 
 const Login = () => {
-  const [email, setEmail] = useState('testuser@edgewater.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

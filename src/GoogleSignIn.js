@@ -22,29 +22,9 @@ const GoogleSignIn = ({ onSuccess, onError }) => {
     }
   }, []);
 
-  const handleCredentialResponse = async (response) => {
-    try {
-      // Send the credential to our backend
-      const result = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: response.credential
-        })
-      });
-
-      const data = await result.json();
-
-      if (result.ok) {
-        onSuccess(data);
-      } else {
-        onError(data.message || 'Google sign-in failed');
-      }
-    } catch (error) {
-      onError('Network error during Google sign-in');
-    }
+  const handleCredentialResponse = (response) => {
+    // Pass the credential response directly to the parent
+    onSuccess({ token: response.credential });
   };
 
   return (
