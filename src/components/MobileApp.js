@@ -11,6 +11,7 @@ import HomeView from './HomeView';
 import UserProfile from './UserProfile';
 import AdminDashboard from './AdminDashboard';
 import MoreView from './MoreView';
+import WeatherDetailView from './WeatherDetailView';
 
 const MobileApp = () => {
   const { logout, user } = useAuth();
@@ -79,10 +80,7 @@ const MobileApp = () => {
           <p>Band guide coming soon!</p>
         </div>;
       case 'weather':
-        return <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <h2>Weather Details</h2>
-          <p>Extended weather view coming soon!</p>
-        </div>;
+        return <WeatherDetailView />;
       case 'dinner':
         return <div style={{ padding: '2rem', textAlign: 'center' }}>
           <h2>Dinner</h2>

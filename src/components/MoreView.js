@@ -8,6 +8,7 @@ const MoreView = ({ setActiveTab }) => {
   const mainFeatures = [
     { id: 'music', label: 'Music', icon: '🎸', tab: 'music' },
     { id: 'photos', label: 'Photos', icon: '📸', tab: 'photos' },
+    { id: 'sasqwatch', label: 'SasqWatch', icon: '👣', tab: 'sasqwatch' },
     { id: 'bags', label: 'Bags', icon: '🎯', tab: 'bags' },
     { id: 'weather', label: 'Weather', icon: '🌊', tab: 'weather' },
     { id: 'dinner', label: 'Dinner', icon: '🍽️', tab: 'dinner' },

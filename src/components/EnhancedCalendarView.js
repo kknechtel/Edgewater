@@ -670,27 +670,92 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
               </div>
               <div style={{ padding: '1rem' }}>
                 {dateEvents.map((event, idx) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    expanded={expandedEvent === event.id}
-                    onToggle={() => {
-                      if (event.bandData) {
-                        setShowBandDetails(event.bandData);
-                      } else {
-                        setExpandedEvent(expandedEvent === event.id ? null : event.id);
-                      }
+                  event.source === 'band' ? (
+                    <div key={event.id} style={{
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem',
+                      marginBottom: '0.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
                     }}
-                    onEdit={() => handleEditEvent(event)}
-                    onDelete={() => handleDeleteEvent(event.id)}
-                    onRSVP={() => handleRSVP(event)}
-                    onAddComment={() => handleAddComment(event.id)}
-                    commentInput={commentInputs[event.id] || ''}
-                    onCommentInputChange={(value) => setCommentInputs({ ...commentInputs, [event.id]: value })}
-                    isOwner={user?.id === event.creator_id}
-                    currentUser={user}
-                    isDarkMode={isDarkMode}
-                  />
+                    onClick={() => setShowBandDetails(event.bandData)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#e2e8f0';
+                      e.currentTarget.style.borderColor = '#0891b2';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f8fafc';
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          backgroundColor: '#4ECDC4',
+                          color: 'white',
+                          width: '2rem',
+                          height: '2rem',
+                          borderRadius: '0.375rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1rem'
+                        }}>
+                          🎸
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            color: '#111827',
+                            marginBottom: '0.25rem'
+                          }}>
+                            {event.title}
+                            {event.bandData?.rating && (
+                              <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: '#f59e0b' }}>
+                                {'⭐'.repeat(event.bandData.rating)}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{
+                            fontSize: '0.875rem',
+                            color: '#6b7280',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem'
+                          }}>
+                            <span>🕕 {event.event_time}</span>
+                            <span>📍 {event.location}</span>
+                          </div>
+                        </div>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          color: '#0891b2',
+                          fontWeight: '500'
+                        }}>
+                          View Details →
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      expanded={expandedEvent === event.id}
+                      onToggle={() => {
+                        setExpandedEvent(expandedEvent === event.id ? null : event.id);
+                      }}
+                      onEdit={() => handleEditEvent(event)}
+                      onDelete={() => handleDeleteEvent(event.id)}
+                      onRSVP={() => handleRSVP(event)}
+                      onAddComment={() => handleAddComment(event.id)}
+                      commentInput={commentInputs[event.id] || ''}
+                      onCommentInputChange={(value) => setCommentInputs({ ...commentInputs, [event.id]: value })}
+                      isOwner={user?.id === event.creator_id}
+                      currentUser={user}
+                      isDarkMode={isDarkMode}
+                    />
+                  )
                 ))}
               </div>
             </div>

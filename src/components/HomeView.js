@@ -576,14 +576,14 @@ const HomeView = ({ setActiveTab }) => {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            onClick={() => setActiveTab('sasqwatch')}
+            onClick={() => setActiveTab('messages')}
           >
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>👣</div>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💬</div>
             <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.125rem' }}>
-              Sightings
+              Beach Chat
             </p>
-            <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#10b981' }}>
-              {recentSightings} this week
+            <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0891b2' }}>
+              Active Now
             </p>
           </div>
           
