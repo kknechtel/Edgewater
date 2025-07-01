@@ -1762,41 +1762,114 @@ const BagsView = () => {
               </div>
             </div>
             
-            <input
-              type="text"
-              value={waitlistPlayerName}
-              onChange={(e) => setWaitlistPlayerName(e.target.value)}
-              placeholder={waitlistEntryType === 'team' ? "Your name" : "Enter your name"}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                fontSize: '1rem',
-                marginBottom: waitlistEntryType === 'team' ? '0.75rem' : '1rem'
-              }}
-            />
-            
-            {waitlistEntryType === 'team' && (
-              <input
-                type="text"
-                value={waitlistTeammate}
-                onChange={(e) => setWaitlistTeammate(e.target.value)}
-                placeholder="Teammate's name"
+            {/* Player Selection */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem', color: '#374151' }}>
+                {waitlistEntryType === 'team' ? 'Your Name' : 'Player Name'}
+              </label>
+              <select
+                value={waitlistPlayerName}
+                onChange={(e) => setWaitlistPlayerName(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '0.75rem',
                   border: '2px solid #e5e7eb',
                   borderRadius: '0.5rem',
                   fontSize: '1rem',
-                  marginBottom: '1rem'
+                  backgroundColor: 'white',
+                  marginBottom: '0.5rem'
                 }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    addToWaitlist();
-                  }
+              >
+                <option value="">Select from app users...</option>
+                {loadingUsers ? (
+                  <option disabled>Loading users...</option>
+                ) : (
+                  appUsers.map(user => (
+                    <option key={user.id} value={user.display_name}>
+                      {user.display_name} ({user.bags_wins || 0}W - {user.bags_losses || 0}L)
+                    </option>
+                  ))
+                )}
+              </select>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+                <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>OR</span>
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+              </div>
+              
+              <input
+                type="text"
+                value={waitlistPlayerName}
+                onChange={(e) => setWaitlistPlayerName(e.target.value)}
+                placeholder="Enter custom name"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem'
                 }}
               />
+            </div>
+            
+            {waitlistEntryType === 'team' && (
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem', color: '#374151' }}>
+                  Teammate Name
+                </label>
+                <select
+                  value={waitlistTeammate}
+                  onChange={(e) => setWaitlistTeammate(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.5rem',
+                    fontSize: '1rem',
+                    backgroundColor: 'white',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  <option value="">Select teammate from app users...</option>
+                  {loadingUsers ? (
+                    <option disabled>Loading users...</option>
+                  ) : (
+                    appUsers
+                      .filter(user => user.display_name !== waitlistPlayerName) // Don't show the same user twice
+                      .map(user => (
+                        <option key={user.id} value={user.display_name}>
+                          {user.display_name} ({user.bags_wins || 0}W - {user.bags_losses || 0}L)
+                        </option>
+                      ))
+                  )}
+                </select>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>OR</span>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+                </div>
+                
+                <input
+                  type="text"
+                  value={waitlistTeammate}
+                  onChange={(e) => setWaitlistTeammate(e.target.value)}
+                  placeholder="Enter custom teammate name"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.5rem',
+                    fontSize: '1rem'
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      addToWaitlist();
+                    }
+                  }}
+                />
+              </div>
             )}
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
