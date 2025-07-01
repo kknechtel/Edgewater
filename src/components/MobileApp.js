@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { notificationService } from '../services/notificationService';\nimport { initializeBands, initializeTournaments, initializeEvents } from '../initializeData';
+import { notificationService } from '../services/notificationService';
 import EnhancedCalendarView from './EnhancedCalendarView';
 import SasqWatch from './features/SasqWatch';
 import Photos from './features/Photos';
