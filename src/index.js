@@ -9,5 +9,28 @@ root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-);console.log('App updated at: Tue July 1 15:10:00 EDT 2025');
-/* Force rebuild with Hourly and Extended Forecast Mon Jun 30 19:54:41 EDT 2025 */
+);
+
+// Register Service Worker for PWA functionality
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful:', registration.scope);
+      })
+      .catch(err => {
+        console.log('ServiceWorker registration failed:', err);
+      });
+  });
+}
+
+// Check if app is installed as PWA
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Could show install button here
+});
+
+console.log('App updated at: Tue July 1 16:54:00 EDT 2025');
+/* PWA Support Added */

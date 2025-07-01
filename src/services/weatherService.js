@@ -1,11 +1,11 @@
 // Weather service using FREE Open-Meteo API - No API key required!
 // Combines weather and marine data for comprehensive beach conditions
 
-// Default beach location - Seabright, CA
+// Default beach location - Sea Bright, NJ
 const BEACH_LOCATION = {
-  lat: 36.9647, // Seabright, CA
-  lon: -122.0102,
-  name: 'Seabright Beach'
+  lat: 40.3607, // Sea Bright, NJ
+  lon: -73.9746,
+  name: 'Sea Bright, NJ'
 };
 
 // Weather code to condition mapping
@@ -52,7 +52,7 @@ export const fetchWeatherData = async (coordinates = null) => {
   try {
     // Use provided coordinates or default location
     const location = coordinates || BEACH_LOCATION;
-    const timezone = coordinates?.timezone || 'America/Los_Angeles';
+    const timezone = coordinates?.timezone || 'America/New_York';
     
     // Fetch current weather and forecast from Open-Meteo (FREE, no API key needed!)
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,uv_index&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=${timezone}`;

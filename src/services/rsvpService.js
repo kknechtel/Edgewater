@@ -36,8 +36,8 @@ class RSVPService {
     }
   }
 
-  // RSVP to an event
-  rsvpToEvent(eventId, userId, userName, rsvpStatus = 'going') {
+  // RSVP to an event with optional comment
+  rsvpToEvent(eventId, userId, userName, rsvpStatus = 'going', comment = '') {
     try {
       // Update user's RSVPs
       const rsvps = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
@@ -53,6 +53,7 @@ class RSVPService {
         rsvps[userId].push({
           eventId,
           status: rsvpStatus,
+          comment: comment,
           timestamp: new Date().toISOString()
         });
       }
@@ -74,6 +75,7 @@ class RSVPService {
           userId,
           userName,
           status: rsvpStatus,
+          comment: comment,
           timestamp: new Date().toISOString()
         });
       }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import '../styles/designSystem.css';
 
 const BagsView = () => {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ const BagsView = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [waitlist, setWaitlist] = useState([]);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
-  const [waitlistPlayerName, setWaitlistPlayerName] = useState('');
+  const [waitlistPlayerName, setWaitlistPlayerName] = useState(user?.display_name || user?.first_name || '');
   const [waitlistEntryType, setWaitlistEntryType] = useState('individual'); // 'individual' or 'team'
   const [waitlistTeammate, setWaitlistTeammate] = useState('');
   const [tournamentState, setTournamentState] = useState({
@@ -85,6 +86,27 @@ const BagsView = () => {
     loadDailyStats();
     loadAppUsers();
   }, []);
+
+  // Update waitlist player name when user changes
+  useEffect(() => {
+    if (user && !waitlistPlayerName) {
+      setWaitlistPlayerName(user.display_name || user.first_name || '');
+    }
+  }, [user]);
+
+  // Pre-populate team 1 with current user
+  useEffect(() => {
+    if (user && setupState.team1Players.length === 0 && !gameState.inProgress) {
+      const userName = user.display_name || user.first_name || 'You';
+      setSetupState(prev => ({
+        ...prev,
+        team1Players: [{
+          name: userName,
+          id: user.id || `user-${Date.now()}`
+        }]
+      }));
+    }
+  }, [user, gameState.inProgress]);
 
   // Load app users for player selection
   const loadAppUsers = async () => {

@@ -10,6 +10,7 @@ import BagsView from './BagsView';
 import HomeView from './features/HomeView';
 import UserProfile from './UserProfile';
 import AdminDashboard from './AdminDashboard';
+import MoreView from './MoreView';
 
 const MobileApp = () => {
   const { logout, user } = useAuth();
@@ -73,6 +74,27 @@ const MobileApp = () => {
         return <Messages />;
       case 'admin':
         return user?.is_admin ? <AdminDashboard /> : <HomeView setActiveTab={setActiveTab} />;
+      case 'more':
+        return <MoreView setActiveTab={setActiveTab} />;
+      case 'profile':
+        return <UserProfile />;
+      case 'photos':
+        return <Photos />;
+      case 'music':
+        return <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>Music & Bands</h2>
+          <p>Band guide coming soon!</p>
+        </div>;
+      case 'weather':
+        return <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>Weather Details</h2>
+          <p>Extended weather view coming soon!</p>
+        </div>;
+      case 'dinner':
+        return <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>Dinner</h2>
+          <p>Dinner reservations coming soon!</p>
+        </div>;
       default:
         return <HomeView setActiveTab={setActiveTab} />;
     }

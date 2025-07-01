@@ -1,0 +1,33 @@
+{
+  "short_name": "Clubbers",
+  "name": "Edgewater Beach Club",
+  "description": "Your beach club community app for events, music, bags tournaments, and more",
+  "icons": [
+    {
+      "src": "beach-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "beach-icon-512.png",
+      "type": "image/png", 
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f0f9ff",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#0891b2",
+  "categories": ["social", "lifestyle", "sports"],
+  "orientation": "portrait",
+  "prefer_related_applications": false,
+  "features": [
+    "weather",
+    "calendar", 
+    "messaging",
+    "photo-sharing"
+  ]
+}
