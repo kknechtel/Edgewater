@@ -48,8 +48,8 @@ const MobileApp = () => {
   const tabs = [
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'calendar', label: 'Events', icon: '📅' },
+    { id: 'bags', label: 'Bags', icon: '🎯' },
     { id: 'messages', label: 'Chat', icon: '💬' },
-    { id: 'sasqwatch', label: 'SasqWatch', icon: '👣' },
     { id: 'more', label: 'More', icon: '⚙️' }
   ];
 

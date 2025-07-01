@@ -20,8 +20,8 @@ const MoreView = ({ setActiveTab }) => {
       id: 'lumalocator',
       title: 'LumaLocator',
       icon: '🔦',
-      desc: 'Track bioluminescent plankton blooms for magical night swims',
-      classified: true
+      desc: 'Track where the Luma family is when they\'re mysteriously never at the beach',
+      special: true
     },
     {
       id: 'lobster-alert',
@@ -55,6 +55,115 @@ const MoreView = ({ setActiveTab }) => {
     }
   ];
 
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      paddingBottom: '5rem',
+      backgroundColor: '#f9fafb'
+    },
+    header: {
+      backgroundColor: '#ffffff',
+      borderBottom: '1px solid #e5e7eb',
+      padding: '1.5rem',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+    },
+    title: {
+      fontSize: '1.75rem',
+      fontWeight: '700',
+      color: '#111827',
+      marginBottom: '0.5rem'
+    },
+    subtitle: {
+      fontSize: '0.875rem',
+      color: '#6b7280'
+    },
+    content: {
+      padding: '1rem'
+    },
+    card: {
+      backgroundColor: '#ffffff',
+      borderRadius: '0.75rem',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+      padding: '1.5rem',
+      marginBottom: '1rem'
+    },
+    cardTitle: {
+      fontSize: '1.25rem',
+      fontWeight: '600',
+      marginBottom: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      color: '#111827'
+    },
+    featureGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '0.75rem'
+    },
+    featureButton: {
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+      cursor: 'pointer',
+      textAlign: 'center',
+      transition: 'all 0.2s',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '0.5rem'
+    },
+    featureIcon: {
+      fontSize: '2rem'
+    },
+    featureLabel: {
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      color: '#111827'
+    },
+    comingSoonCard: {
+      backgroundColor: '#ffffff',
+      border: '2px dashed #e5e7eb',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1rem',
+      marginBottom: '0.75rem',
+      opacity: 0.8,
+      transition: 'all 0.2s',
+      cursor: 'default'
+    },
+    comingSoonIcon: {
+      fontSize: '2.5rem',
+      minWidth: '60px',
+      textAlign: 'center'
+    },
+    comingSoonContent: {
+      flex: 1
+    },
+    comingSoonTitle: {
+      fontSize: '1rem',
+      fontWeight: '600',
+      color: '#111827',
+      marginBottom: '0.25rem'
+    },
+    comingSoonDesc: {
+      fontSize: '0.875rem',
+      color: '#6b7280',
+      lineHeight: 1.4
+    },
+    comingSoonBadge: {
+      backgroundColor: '#8b5cf6',
+      color: 'white',
+      padding: '0.25rem 0.75rem',
+      borderRadius: '1rem',
+      fontSize: '0.75rem',
+      fontWeight: '600'
+    }
+  };
+
   const handleFeatureClick = (feature) => {
     if (feature.id === 'lumalocator') {
       setShowLumaModal(true);
@@ -62,150 +171,131 @@ const MoreView = ({ setActiveTab }) => {
   };
 
   return (
-    <div style={{ 
-      backgroundColor: 'var(--bg-secondary)', 
-      minHeight: '100vh',
-      paddingBottom: '5rem'
-    }}>
+    <div style={styles.container}>
       {/* Header */}
-      <div className="card" style={{ 
-        borderRadius: 0,
-        marginBottom: 0,
-        boxShadow: 'var(--shadow)',
-        padding: 'var(--space-6)'
-      }}>
-        <h1 className="text-2xl font-bold text-primary">More</h1>
-        <p className="text-sm text-muted">
-          All features & settings
-        </p>
+      <div style={styles.header}>
+        <h1 style={styles.title}>More</h1>
+        <p style={styles.subtitle}>All features & settings</p>
       </div>
 
       {/* Main Content */}
-      <div style={{ padding: 'var(--space-4)' }}>
+      <div style={styles.content}>
         {/* Main Features */}
-        <div className="card">
-          <h2 className="card-title">
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>
             <span>🎯</span> Features
           </h2>
           
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 'var(--space-3)'
-          }}>
+          <div style={styles.featureGrid}>
             {mainFeatures.map(feature => (
               <button
                 key={feature.id}
-                className="card"
-                style={{
-                  padding: 'var(--space-4)',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  border: '1px solid var(--gray-200)',
-                  transition: 'all var(--transition)'
-                }}
+                style={styles.featureButton}
                 onClick={() => setActiveTab(feature.tab)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
-                <div style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>
-                  {feature.icon}
-                </div>
-                <div className="text-sm font-medium">{feature.label}</div>
+                <div style={styles.featureIcon}>{feature.icon}</div>
+                <div style={styles.featureLabel}>{feature.label}</div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Coming Soon Section */}
-        <div className="card" style={{ marginTop: 'var(--space-4)' }}>
-          <h2 className="card-title">
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>
             <span>✨</span> Coming Soon
           </h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div>
             {comingSoonFeatures.map(feature => (
               <div
                 key={feature.id}
                 style={{
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '2px dashed var(--gray-200)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: 'var(--space-4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-4)',
-                  opacity: 0.8,
-                  transition: 'all var(--transition)',
-                  cursor: feature.classified ? 'pointer' : 'default'
+                  ...styles.comingSoonCard,
+                  cursor: feature.special ? 'pointer' : 'default',
+                  borderColor: feature.special ? '#8b5cf6' : '#e5e7eb'
                 }}
                 onClick={() => handleFeatureClick(feature)}
-                className="hover:opacity-100 hover:border-primary"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                  if (feature.special) {
+                    e.currentTarget.style.borderColor = '#8b5cf6';
+                    e.currentTarget.style.transform = 'translateX(4px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '0.8';
+                  e.currentTarget.style.borderColor = feature.special ? '#8b5cf6' : '#e5e7eb';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
               >
-                <div style={{ 
-                  fontSize: 'var(--text-3xl)', 
-                  minWidth: '60px',
-                  textAlign: 'center'
-                }}>
-                  {feature.icon}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 className="text-base font-semibold text-primary mb-1">
+                <div style={styles.comingSoonIcon}>{feature.icon}</div>
+                <div style={styles.comingSoonContent}>
+                  <h3 style={styles.comingSoonTitle}>
                     {feature.title}
-                    {feature.classified && (
+                    {feature.special && (
                       <span style={{
-                        marginLeft: 'var(--space-2)',
-                        fontSize: 'var(--text-xs)',
-                        backgroundColor: 'var(--danger)',
-                        color: 'var(--white)',
+                        marginLeft: '0.5rem',
+                        fontSize: '0.75rem',
+                        backgroundColor: '#ef4444',
+                        color: 'white',
                         padding: '0.125rem 0.5rem',
-                        borderRadius: 'var(--radius-full)',
+                        borderRadius: '1rem',
                         verticalAlign: 'middle'
                       }}>
-                        CLASSIFIED
+                        TOP SECRET
                       </span>
                     )}
                   </h3>
-                  <p className="text-sm text-muted">
-                    {feature.desc}
-                  </p>
+                  <p style={styles.comingSoonDesc}>{feature.desc}</p>
                 </div>
-                <span style={{
-                  backgroundColor: 'var(--purple)',
-                  color: 'var(--white)',
-                  padding: 'var(--space-1) var(--space-3)',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: 'var(--text-xs)',
-                  fontWeight: 'var(--font-semibold)'
-                }}>
-                  Soon
-                </span>
+                <span style={styles.comingSoonBadge}>Soon</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* App Info */}
-        <div className="card" style={{ marginTop: 'var(--space-4)' }}>
-          <h2 className="card-title">
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>
             <span>📱</span> App Info
           </h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-            <div className="text-sm text-secondary">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ fontSize: '0.875rem', color: '#4b5563' }}>
               <strong>Version:</strong> 2.0.0
             </div>
-            <div className="text-sm text-secondary">
+            <div style={{ fontSize: '0.875rem', color: '#4b5563' }}>
               <strong>Beach Location:</strong> Sea Bright, NJ
             </div>
             {user && (
-              <div className="text-sm text-secondary">
+              <div style={{ fontSize: '0.875rem', color: '#4b5563' }}>
                 <strong>Logged in as:</strong> {user.display_name || user.first_name || user.email}
               </div>
             )}
           </div>
           
           <button
-            className="btn btn-primary"
-            style={{ marginTop: 'var(--space-4)', width: '100%' }}
+            style={{
+              backgroundColor: '#0891b2',
+              color: 'white',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.75rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              marginTop: '1rem',
+              width: '100%'
+            }}
             onClick={() => {
               if ('share' in navigator) {
                 navigator.share({
@@ -233,84 +323,104 @@ const MoreView = ({ setActiveTab }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 'var(--space-4)',
-          zIndex: 'var(--z-modal)'
+          padding: '1rem',
+          zIndex: 1000
         }}
         onClick={() => setShowLumaModal(false)}>
-          <div className="card" style={{
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '0.75rem',
+            padding: '2rem',
             maxWidth: '400px',
             width: '100%',
-            padding: 'var(--space-6)',
-            textAlign: 'center'
+            textAlign: 'center',
+            boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
           }}
           onClick={(e) => e.stopPropagation()}>
             <div style={{ 
               fontSize: '4rem', 
-              marginBottom: 'var(--space-4)',
-              filter: 'brightness(0) invert(1)',
-              backgroundColor: 'black',
-              width: '80px',
-              height: '80px',
-              margin: '0 auto var(--space-4)',
-              borderRadius: 'var(--radius-full)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              marginBottom: '1rem'
             }}>
               🔦
             </div>
             
-            <h2 className="text-xl font-bold mb-4">
-              PROJECT LUMALOC
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: '1rem',
+              color: '#111827'
+            }}>
+              LumaLocator™
             </h2>
             
             <div style={{
-              backgroundColor: 'var(--danger)',
-              color: 'var(--white)',
-              padding: 'var(--space-2)',
-              borderRadius: 'var(--radius)',
-              marginBottom: 'var(--space-4)',
-              fontSize: 'var(--text-xs)',
-              fontWeight: 'var(--font-bold)'
+              backgroundColor: '#fef3c7',
+              color: '#92400e',
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+              fontWeight: '600'
             }}>
-              LEVEL 5 CLEARANCE REQUIRED
+              FAMILY TRACKING SYSTEM
             </div>
             
-            <p className="text-sm text-secondary mb-4">
-              This feature is part of the National Oceanic Defense Initiative (NODI). 
-              Bioluminescent tracking data is collected for "recreational purposes only" 
-              and definitely not for monitoring underwater movements of [REDACTED].
+            <p style={{
+              fontSize: '0.875rem',
+              color: '#4b5563',
+              marginBottom: '1rem',
+              lineHeight: 1.5
+            }}>
+              Advanced GPS tracking technology to locate the elusive Luma family 
+              who somehow are never at the beach when you need them.
             </p>
             
-            <p className="text-xs text-muted mb-4">
-              By accessing this feature, you consent to passive monitoring by the 
-              Department of Aquatic Phenomena. Your location data will be used to 
-              enhance "plankton prediction algorithms."
-            </p>
-            
-            <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-              <button
-                className="btn btn-secondary"
-                style={{ flex: 1 }}
-                onClick={() => setShowLumaModal(false)}
-              >
-                Deny Access
-              </button>
-              <button
-                className="btn"
-                style={{ 
-                  flex: 1, 
-                  backgroundColor: 'var(--danger)',
-                  color: 'var(--white)'
-                }}
-                onClick={() => {
-                  alert('ACCESS DENIED\n\nInsufficient clearance level.\nThis incident has been reported.');
-                  setShowLumaModal(false);
-                }}
-              >
-                Request Access
-              </button>
+            <div style={{
+              backgroundColor: '#f3f4f6',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                marginBottom: '0.5rem',
+                color: '#111827'
+              }}>
+                Last Known Sightings:
+              </h3>
+              <ul style={{
+                fontSize: '0.75rem',
+                color: '#6b7280',
+                textAlign: 'left',
+                listStyle: 'none',
+                padding: 0
+              }}>
+                <li>• "Just left for the store" (3 hours ago)</li>
+                <li>• "Be there in 5 minutes" (45 minutes ago)</li>
+                <li>• "On our way!" (Status: Still at home)</li>
+              </ul>
             </div>
+            
+            <button
+              style={{
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 2rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                width: '100%'
+              }}
+              onClick={() => {
+                alert('TRACKING INITIATED...\n\nError: Lumas have disabled location services.\n\nLast message: "Almost there!"');
+                setShowLumaModal(false);
+              }}
+            >
+              Activate Tracker
+            </button>
           </div>
         </div>
       )}

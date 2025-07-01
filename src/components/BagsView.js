@@ -37,8 +37,14 @@ const BagsView = () => {
     team2Name: '',
     team1Players: [],
     team2Players: [],
+    team1Logo: '🔴',
+    team2Logo: '🔵',
     newPlayerName: ''
   });
+  
+  // Saved teams
+  const [savedTeams, setSavedTeams] = useState([]);
+  const [showSavedTeams, setShowSavedTeams] = useState(false);
 
   // Scoring state for current throw
   const [throwState, setThrowState] = useState({
@@ -47,6 +53,9 @@ const BagsView = () => {
     team2OnBoard: 0,
     team2InHole: 0
   });
+  
+  // Active team for mobile scoring
+  const [activeTeam, setActiveTeam] = useState('team1');
 
   const [playerStats, setPlayerStats] = useState({});
   const [leaderboard, setLeaderboard] = useState([]);
@@ -78,12 +87,24 @@ const BagsView = () => {
     goodThrow: ['Nice Toss!', 'Smooth!', 'Dialed In!', 'On Fire!', 'Money!'],
     comeback: ['Clutch!', 'Ice Cold!', 'Pressure Player!', 'Beast Mode!']
   };
+  
+  // Fun team logos/emojis
+  const teamLogos = [
+    '🔴', '🔵', '🟢', '🟡', '🟠', '🟣', '⚫', '⚪',
+    '🎉', '🎆', '💥', '⚡', '🔥', '🌊', '🌪️', '🌈',
+    '🦅', '🦆', '🦉', '🦜', '🐉', '🐍', '🦖', '🦕',
+    '🎯', '🪵', '🍺', '🍻', '🍸', '🍹', '🍷', '🥃',
+    '🏆', '🥇', '🥈', '🥉', '👑', '👒', '🧞', '🧟',
+    '🏴‍☠️', '🏁', '🇺🇸', '🚀', '🛸', '✈️', '🚢', '⛵',
+    '😈', '👽', '👾', '🤖', '💀', '☠️', '💯', '🎰'
+  ];
 
   useEffect(() => {
     loadPlayerStats();
     loadWaitlist();
     loadDailyStats();
     loadAppUsers();
+    loadSavedTeams();
   }, []);
 
   // Update waitlist player name when user changes
@@ -93,6 +114,64 @@ const BagsView = () => {
     }
   }, [user]);
 
+  // Load saved teams
+  const loadSavedTeams = () => {
+    const saved = localStorage.getItem('bagsSavedTeams');
+    if (saved) {
+      setSavedTeams(JSON.parse(saved));
+    }
+  };
+  
+  // Save a team configuration
+  const saveTeam = () => {
+    if (!setupState.team1Name || setupState.team1Players.length === 0) {
+      alert('Please set up at least Team 1 with a name and players!');
+      return;
+    }
+    
+    const teamToSave = {
+      id: Date.now(),
+      name: setupState.team1Name,
+      logo: setupState.team1Logo,
+      players: setupState.team1Players,
+      createdAt: new Date().toISOString(),
+      wins: 0,
+      losses: 0
+    };
+    
+    const updated = [...savedTeams, teamToSave];
+    localStorage.setItem('bagsSavedTeams', JSON.stringify(updated));
+    setSavedTeams(updated);
+    alert(`Team "${teamToSave.name}" saved!`);
+  };
+  
+  // Load a saved team
+  const loadTeam = (team, targetTeam) => {
+    if (targetTeam === 'team1') {
+      setSetupState(prev => ({
+        ...prev,
+        team1Name: team.name,
+        team1Logo: team.logo,
+        team1Players: team.players
+      }));
+    } else {
+      setSetupState(prev => ({
+        ...prev,
+        team2Name: team.name,
+        team2Logo: team.logo,
+        team2Players: team.players
+      }));
+    }
+    setShowSavedTeams(false);
+  };
+  
+  // Delete a saved team
+  const deleteSavedTeam = (teamId) => {
+    const updated = savedTeams.filter(t => t.id !== teamId);
+    localStorage.setItem('bagsSavedTeams', JSON.stringify(updated));
+    setSavedTeams(updated);
+  };
+  
   // Pre-populate team 1 with current user
   useEffect(() => {
     if (user && setupState.team1Players.length === 0 && !gameState.inProgress) {
@@ -270,6 +349,7 @@ const BagsView = () => {
       team1: {
         ...prev.team1,
         name: team1Name,
+        logo: setupState.team1Logo,
         players: setupState.team1Players,
         score: 0,
         roundScores: [],
@@ -279,6 +359,7 @@ const BagsView = () => {
       team2: {
         ...prev.team2,
         name: team2Name,
+        logo: setupState.team2Logo,
         players: setupState.team2Players,
         score: 0,
         roundScores: [],
@@ -636,57 +717,291 @@ const BagsView = () => {
   };
 
   const renderGameSetup = () => (
-    <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-      <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: '#374151' }}>
-        🎯 Game Setup
-      </h3>
+    <div style={{ backgroundColor: 'white', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', position: 'relative' }}>
+      {/* Saved Teams Modal */}
+      {showSavedTeams && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}
+        onClick={() => setShowSavedTeams(false)}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '1rem',
+            padding: '2rem',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}
+          onClick={(e) => e.stopPropagation()}>
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: '1.5rem',
+              color: '#111827'
+            }}>
+              📋 Saved Teams
+            </h3>
+            
+            {savedTeams.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#6b7280' }}>No saved teams yet!</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {savedTeams.map(team => (
+                  <div key={team.id} style={{
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    border: '2px solid #e5e7eb'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '0.5rem'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                      }}>
+                        <span style={{ fontSize: '2rem' }}>{team.logo}</span>
+                        <div>
+                          <h4 style={{
+                            fontSize: '1.125rem',
+                            fontWeight: '600',
+                            color: '#111827'
+                          }}>
+                            {team.name}
+                          </h4>
+                          <p style={{
+                            fontSize: '0.75rem',
+                            color: '#6b7280'
+                          }}>
+                            {team.wins}W - {team.losses}L
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteSavedTeam(team.id)}
+                        style={{
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.5rem',
+                          padding: '0.5rem',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                    
+                    <div style={{
+                      fontSize: '0.875rem',
+                      color: '#4b5563',
+                      marginBottom: '0.75rem'
+                    }}>
+                      Players: {team.players.map(p => p.name).join(', ')}
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => loadTeam(team, 'team1')}
+                        style={{
+                          flex: 1,
+                          backgroundColor: '#dc2626',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.5rem',
+                          padding: '0.5rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Load as Team 1
+                      </button>
+                      <button
+                        onClick={() => loadTeam(team, 'team2')}
+                        style={{
+                          flex: 1,
+                          backgroundColor: '#2563eb',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.5rem',
+                          padding: '0.5rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Load as Team 2
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <button
+              onClick={() => setShowSavedTeams(false)}
+              style={{
+                width: '100%',
+                marginTop: '1.5rem',
+                backgroundColor: '#6b7280',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.75rem',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       
-      {/* Team Names */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#111827' }}>
+          <span>🎯</span> Game Setup
+        </h3>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={() => setShowSavedTeams(true)}
+            style={{
+              backgroundColor: '#8b5cf6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              padding: '0.5rem 1rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <span>📋</span> Load Team
+          </button>
+          <button
+            onClick={saveTeam}
+            disabled={!setupState.team1Name || setupState.team1Players.length === 0}
+            style={{
+              backgroundColor: setupState.team1Name && setupState.team1Players.length > 0 ? '#10b981' : '#9ca3af',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              padding: '0.5rem 1rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              cursor: setupState.team1Name && setupState.team1Players.length > 0 ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <span>💾</span> Save Team 1
+          </button>
+        </div>
+      </div>
+      
+      {/* Team Names and Logos */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div>
-          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem', color: '#374151' }}>
-            Team 1 Name (optional)
-          </label>
-          <input
-            type="text"
-            value={setupState.team1Name}
-            onChange={(e) => setSetupState(prev => ({ ...prev, team1Name: e.target.value }))}
-            placeholder="e.g., Bag Crushers, Hole Hunters"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              border: '2px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              fontSize: '1rem'
-            }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem', color: '#374151' }}>
-            Team 2 Name (optional)
-          </label>
-          <input
-            type="text"
-            value={setupState.team2Name}
-            onChange={(e) => setSetupState(prev => ({ ...prev, team2Name: e.target.value }))}
-            placeholder="e.g., Toss Masters, Board Lords"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              border: '2px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              fontSize: '1rem'
-            }}
-          />
-        </div>
+        {['team1', 'team2'].map((team) => (
+          <div key={team}>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#374151' }}>
+              {team === 'team1' ? 'Team 1' : 'Team 2'} Identity
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
+              <button
+                onClick={() => {
+                  const logos = [...teamLogos];
+                  const currentIndex = logos.indexOf(setupState[`${team}Logo`]);
+                  const nextIndex = (currentIndex + 1) % logos.length;
+                  setSetupState(prev => ({ ...prev, [`${team}Logo`]: logos[nextIndex] }));
+                }}
+                style={{
+                  fontSize: '2.5rem',
+                  backgroundColor: '#f3f4f6',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  width: '70px',
+                  height: '55px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  flexShrink: 0
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)';
+                  e.currentTarget.style.borderColor = '#0891b2';
+                  e.currentTarget.style.backgroundColor = '#ecfeff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                  e.currentTarget.style.borderColor = '#e5e7eb';
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                title="Click to change logo"
+              >
+                {setupState[`${team}Logo`]}
+              </button>
+              <input
+                type="text"
+                value={setupState[`${team}Name`]}
+                onChange={(e) => setSetupState(prev => ({ ...prev, [`${team}Name`]: e.target.value }))}
+                placeholder={team === 'team1' ? "e.g., Bag Crushers" : "e.g., Hole Hunters"}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '500'
+                }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Player Setup */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         {['team1', 'team2'].map((team, teamIndex) => (
-          <div key={team} style={{ border: '2px solid #e5e7eb', borderRadius: '0.75rem', padding: '1rem' }}>
-            <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#374151' }}>
-              {team === 'team1' ? '🔴 Team 1' : '🔵 Team 2'} Players (1-2 players)
+          <div key={team} style={{ 
+            border: '2px solid #e5e7eb', 
+            borderRadius: '0.75rem', 
+            padding: '1rem',
+            backgroundColor: team === 'team1' ? '#fee2e2' : '#dbeafe'
+          }}>
+            <h4 style={{ 
+              fontSize: '1rem', 
+              fontWeight: '600', 
+              marginBottom: '0.75rem', 
+              color: '#111827', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem' 
+            }}>
+              <span style={{ fontSize: '1.5rem' }}>{setupState[`${team}Logo`]}</span>
+              {setupState[`${team}Name`] || (team === 'team1' ? 'Team 1' : 'Team 2')} Players
             </h4>
             
             {/* Current Players */}
@@ -837,8 +1152,8 @@ const BagsView = () => {
       {/* Score Display */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
         <div style={{ textAlign: 'center', padding: '1rem', backgroundColor: '#fef2f2', borderRadius: '0.75rem', border: '2px solid #f87171' }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', margin: '0 0 0.5rem 0', color: '#dc2626' }}>
-            🔴 {gameState.team1.name}
+          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', margin: '0 0 0.5rem 0', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>{gameState.team1.logo || '🔴'}</span> {gameState.team1.name}
           </h3>
           <div style={{ fontSize: '2rem', fontWeight: '700', margin: '0 0 0.5rem 0', color: '#dc2626' }}>
             {gameState.team1.score}
@@ -853,8 +1168,8 @@ const BagsView = () => {
         </div>
 
         <div style={{ textAlign: 'center', padding: '1rem', backgroundColor: '#eff6ff', borderRadius: '0.75rem', border: '2px solid #60a5fa' }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', margin: '0 0 0.5rem 0', color: '#2563eb' }}>
-            🔵 {gameState.team2.name}
+          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', margin: '0 0 0.5rem 0', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>{gameState.team2.logo || '🔵'}</span> {gameState.team2.name}
           </h3>
           <div style={{ fontSize: '2rem', fontWeight: '700', margin: '0 0 0.5rem 0', color: '#2563eb' }}>
             {gameState.team2.score}
@@ -873,8 +1188,8 @@ const BagsView = () => {
         
         {['team1', 'team2'].map((team, index) => (
           <div key={team} style={{ marginBottom: '1rem' }}>
-            <h5 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: team === 'team1' ? '#dc2626' : '#2563eb' }}>
-              {team === 'team1' ? '🔴' : '🔵'} {gameState[team].name}
+            <h5 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: team === 'team1' ? '#dc2626' : '#2563eb', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.25rem' }}>{gameState[team].logo || (team === 'team1' ? '🔴' : '🔵')}</span> {gameState[team].name}
             </h5>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -1022,8 +1337,8 @@ const BagsView = () => {
         })()}
       </div>
 
-      {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      {/* Action Buttons - One-Handed Friendly */}
+      <div style={{ display: 'flex', gap: '0.75rem' }}>
         <button
           onClick={submitRound}
           style={{
@@ -1032,29 +1347,48 @@ const BagsView = () => {
             color: 'white',
             border: 'none',
             borderRadius: '0.75rem',
-            padding: '1rem',
-            fontSize: '1rem',
-            fontWeight: '600',
-            cursor: 'pointer'
+            padding: '1rem 1.5rem',
+            fontSize: '1.125rem',
+            fontWeight: '700',
+            cursor: 'pointer',
+            minHeight: '56px',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
           }}
         >
-          ✅ Complete Round {gameState.currentRound}
+          ✅ Submit Round
         </button>
         
         <button
-          onClick={resetGame}
+          onClick={() => {
+            setThrowState({
+              team1InHole: 0,
+              team1OnBoard: 0,
+              team2InHole: 0,
+              team2OnBoard: 0
+            });
+          }}
           style={{
-            backgroundColor: '#ef4444',
+            backgroundColor: '#6b7280',
             color: 'white',
             border: 'none',
             borderRadius: '0.75rem',
             padding: '1rem',
             fontSize: '1rem',
             fontWeight: '500',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            minWidth: '80px'
           }}
         >
-          🔄 Reset
+          Clear
         </button>
       </div>
     </div>

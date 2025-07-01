@@ -439,17 +439,23 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
     today.setHours(0, 0, 0, 0);
 
     return (
-      <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '0.75rem',
+        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+        overflow: 'hidden'
+      }}>
         {/* Calendar Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', backgroundColor: '#e5e7eb' }}>
           {/* Day Headers */}
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} style={{
-              padding: '0.5rem',
+              padding: '0.75rem',
               textAlign: 'center',
               fontWeight: '600',
               fontSize: '0.875rem',
-              backgroundColor: '#f3f4f6'
+              backgroundColor: '#f9fafb',
+              color: '#374151'
             }}>
               {day}
             </div>
@@ -463,42 +469,52 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
             
             return (
               <div key={index} style={{
-                minHeight: '120px',
-                backgroundColor: date ? 'white' : '#f9fafb',
+                minHeight: '100px',
+                backgroundColor: date ? '#ffffff' : '#f9fafb',
                 padding: '0.5rem',
                 position: 'relative',
                 cursor: date ? 'pointer' : 'default',
-                border: isToday ? '2px solid #3b82f6' : 'none'
+                border: isToday ? '2px solid #0891b2' : 'none',
+                transition: 'background-color 0.2s'
               }}
-              onClick={() => date && setSelectedDate(date)}>
+              onClick={() => date && setSelectedDate(date)}
+              onMouseEnter={(e) => {
+                if (date && !isToday) {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (date && !isToday) {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }
+              }}>
                 {date && (
                   <>
                     <div style={{
-                      fontWeight: isToday ? '700' : '400',
+                      fontWeight: isToday ? '700' : '500',
                       fontSize: '0.875rem',
-                      color: isToday ? '#3b82f6' : '#374151',
-                      marginBottom: '0.25rem'
+                      color: isToday ? '#0891b2' : isSelected ? '#111827' : '#374151',
+                      marginBottom: '0.5rem'
                     }}>
                       {date.getDate()}
                     </div>
                     
-                    {/* Event Pills - Make them more readable */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      {dayEvents.slice(0, 2).map((event, idx) => (
+                    {/* Event Pills */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      {dayEvents.slice(0, 3).map((event, idx) => (
                         <div key={event.id} style={{
-                          backgroundColor: getEventTypeColor(event.event_type),
-                          color: 'white',
-                          padding: '4px 6px',
+                          backgroundColor: getEventTypeColor(event.event_type) + '15',
+                          color: '#111827',
+                          border: `1px solid ${getEventTypeColor(event.event_type)}`,
+                          padding: '2px 4px',
                           borderRadius: '4px',
-                          fontSize: '0.7rem',
-                          fontWeight: '500',
+                          fontSize: '0.625rem',
+                          fontWeight: '600',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -507,19 +523,26 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
                           } else {
                             setExpandedEvent(event.id);
                           }
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = getEventTypeColor(event.event_type);
+                          e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = getEventTypeColor(event.event_type) + '15';
+                          e.currentTarget.style.color = '#111827';
                         }}>
-                          <span style={{ fontSize: '0.875rem' }}>{getEventIcon(event.event_type)}</span>
                           <span title={event.title}>{event.title}</span>
                         </div>
                       ))}
-                      {dayEvents.length > 2 && (
+                      {dayEvents.length > 3 && (
                         <div style={{
                           fontSize: '0.625rem',
                           color: '#6b7280',
                           textAlign: 'center',
-                          fontWeight: '500'
+                          fontWeight: '600'
                         }}>
-                          +{dayEvents.length - 2} more
+                          +{dayEvents.length - 3} more
                         </div>
                       )}
                     </div>
@@ -532,12 +555,25 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
         
         {/* Selected Date Events */}
         {selectedDate && (
-          <div style={{ padding: '1rem', borderTop: '1px solid #e5e7eb' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+          <div style={{ padding: '1.5rem', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+            <h3 style={{
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              marginBottom: '1rem',
+              color: '#111827'
+            }}>
               Events on {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
             </h3>
             {getEventsForDate(selectedDate).length === 0 ? (
-              <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>No events scheduled</p>
+              <div style={{
+                textAlign: 'center',
+                padding: '2rem',
+                color: '#6b7280',
+                fontSize: '0.875rem'
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.5 }}>📅</div>
+                <p>No events scheduled for this date</p>
+              </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {getEventsForDate(selectedDate).map(event => (
@@ -582,25 +618,58 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
     });
 
     return (
-      <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '0.75rem',
+        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+        overflow: 'hidden'
+      }}>
         {Object.keys(eventsByDate).length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-            <p>No upcoming events</p>
+          <div style={{
+            padding: '4rem 2rem',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>📅</div>
+            <p style={{
+              color: '#6b7280',
+              fontSize: '1rem',
+              marginBottom: '1.5rem'
+            }}>No upcoming events scheduled</p>
+            <button
+              onClick={handleCreateEvent}
+              style={{
+                backgroundColor: '#0891b2',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Create First Event
+            </button>
           </div>
         ) : (
           Object.entries(eventsByDate).map(([dateKey, dateEvents]) => (
             <div key={dateKey} style={{ borderBottom: '1px solid #e5e7eb' }}>
               <div style={{
-                padding: '0.75rem 1rem',
+                padding: '1rem 1.5rem',
                 backgroundColor: '#f9fafb',
                 fontWeight: '600',
-                fontSize: '0.875rem',
-                color: '#374151'
+                fontSize: '1rem',
+                color: '#111827',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
+                <span style={{ fontSize: '1.25rem' }}>📅</span>
                 {formatDateHeader(new Date(dateKey))}
               </div>
-              <div style={{ padding: '0.5rem' }}>
-                {dateEvents.map(event => (
+              <div style={{ padding: '1rem' }}>
+                {dateEvents.map((event, idx) => (
                   <EventCard
                     key={event.id}
                     event={event}
@@ -723,193 +792,284 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
     }
   };
 
-  return (
-    <div style={{ 
-      maxWidth: '1024px', 
-      margin: '0 auto', 
-      padding: '1rem',
-      background: '#E3F2FD', // Light blue background for readability
+  const styles = {
+    container: {
       minHeight: '100vh',
-      borderRadius: '0'
-    }}>
+      paddingBottom: '5rem',
+      backgroundColor: '#f9fafb'
+    },
+    header: {
+      backgroundColor: '#ffffff',
+      borderBottom: '1px solid #e5e7eb',
+      padding: '1.5rem',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+    },
+    headerTop: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '1rem',
+      flexWrap: 'wrap',
+      gap: '0.75rem'
+    },
+    title: {
+      fontSize: '1.75rem',
+      fontWeight: '700',
+      color: '#111827',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem'
+    },
+    subtitle: {
+      fontSize: '0.875rem',
+      color: '#6b7280'
+    },
+    btnPrimary: {
+      backgroundColor: '#0891b2',
+      color: 'white',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '0.75rem',
+      fontSize: '0.875rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+      minHeight: '44px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      transition: 'all 0.2s'
+    },
+    btnSecondary: {
+      backgroundColor: '#f59e0b',
+      color: 'white',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '0.75rem',
+      fontSize: '0.875rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+      minHeight: '44px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      transition: 'all 0.2s'
+    },
+    content: {
+      padding: '1rem'
+    },
+    viewToggle: {
+      display: 'flex',
+      backgroundColor: '#f3f4f6',
+      borderRadius: '0.75rem',
+      padding: '0.125rem',
+      border: '1px solid #e5e7eb'
+    },
+    viewButton: {
+      padding: '0.5rem 1rem',
+      fontSize: '0.875rem',
+      border: 'none',
+      borderRadius: '0.625rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      minWidth: '80px'
+    }
+  };
+
+  return (
+    <div style={styles.container}>
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '1rem',
-        flexWrap: 'wrap',
-        gap: '0.5rem'
-      }}>
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: '900', 
-          margin: 0,
-          color: '#000000',
-          textShadow: '3px 3px 6px rgba(255,255,255,1)',
-          letterSpacing: '2px',
-          background: '#FFFFFF',
-          padding: '1rem',
-          borderRadius: '1rem',
-          border: '4px solid #1976D2'
-        }}>
-          🏖️ BEACH EVENTS
-        </h1>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            onClick={() => setShowTournamentModal(true)}
-            style={{
-              backgroundColor: '#60a5fa',
-              color: 'white',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <span>🎯</span> New Tournament
-          </button>
-          <button
-            onClick={handleCreateEvent}
-            style={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <span>+</span> New Event
-          </button>
+      <div style={styles.header}>
+        <div style={styles.headerTop}>
+          <div>
+            <h1 style={styles.title}>
+              <span>📅</span> Events Calendar
+            </h1>
+            <p style={styles.subtitle}>Manage and view all beach club events</p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={() => setShowTournamentModal(true)}
+              style={{
+                ...styles.btnSecondary,
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <span>🎯</span> New Tournament
+            </button>
+            <button
+              onClick={handleCreateEvent}
+              style={styles.btnPrimary}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <span>+</span> New Event
+            </button>
+          </div>
         </div>
       </div>
 
       {/* View Toggle & Navigation */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '1rem',
-        flexWrap: 'wrap',
-        gap: '0.5rem'
-      }}>
-        {/* View Mode Toggle */}
+      <div style={styles.content}>
         <div style={{
           display: 'flex',
-          backgroundColor: '#f3f4f6',
-          borderRadius: '0.5rem',
-          padding: '0.125rem'
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem'
         }}>
-          <button
-            onClick={() => setViewMode('month')}
-            style={{
-              padding: '0.375rem 0.75rem',
-              fontSize: '0.875rem',
-              border: 'none',
-              borderRadius: '0.375rem',
-              backgroundColor: viewMode === 'month' ? 'white' : 'transparent',
-              color: viewMode === 'month' ? '#374151' : '#6b7280',
-              fontWeight: '500',
-              cursor: 'pointer',
-              boxShadow: viewMode === 'month' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'
-            }}
-          >
-            📅 Month
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            style={{
-              padding: '0.375rem 0.75rem',
-              fontSize: '0.875rem',
-              border: 'none',
-              borderRadius: '0.375rem',
-              backgroundColor: viewMode === 'list' ? 'white' : 'transparent',
-              color: viewMode === 'list' ? '#374151' : '#6b7280',
-              fontWeight: '500',
-              cursor: 'pointer',
-              boxShadow: viewMode === 'list' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'
-            }}
-          >
-            📋 List
-          </button>
-        </div>
-
-        {/* Month Navigation */}
-        {viewMode === 'month' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* View Mode Toggle */}
+          <div style={styles.viewToggle}>
             <button
-              onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}
+              onClick={() => setViewMode('month')}
               style={{
-                padding: '0.375rem 0.5rem',
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '1.25rem',
-                lineHeight: '1'
+                ...styles.viewButton,
+                backgroundColor: viewMode === 'month' ? '#ffffff' : 'transparent',
+                color: viewMode === 'month' ? '#111827' : '#6b7280',
+                boxShadow: viewMode === 'month' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'
               }}
             >
-              ‹
+              📅 Month
             </button>
             <button
-              onClick={() => setSelectedDate(new Date())}
+              onClick={() => setViewMode('list')}
               style={{
-                padding: '0.375rem 0.75rem',
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: '500'
+                ...styles.viewButton,
+                backgroundColor: viewMode === 'list' ? '#ffffff' : 'transparent',
+                color: viewMode === 'list' ? '#111827' : '#6b7280',
+                boxShadow: viewMode === 'list' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'
               }}
             >
-              Today
-            </button>
-            <span style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              minWidth: '150px',
-              textAlign: 'center'
-            }}>
-              {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </span>
-            <button
-              onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}
-              style={{
-                padding: '0.375rem 0.5rem',
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '1.25rem',
-                lineHeight: '1'
-              }}
-            >
-              ›
+              📋 List
             </button>
           </div>
+
+          {/* Month Navigation */}
+          {viewMode === 'month' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button
+                onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}
+                style={{
+                  padding: '0.5rem',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '1.25rem',
+                  lineHeight: '1',
+                  minWidth: '40px',
+                  minHeight: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+              >
+                ‹
+              </button>
+              <button
+                onClick={() => setSelectedDate(new Date())}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: '#0891b2',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ecfeff';
+                  e.currentTarget.style.borderColor = '#0891b2';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#e5e7eb';
+                }}
+              >
+                Today
+              </button>
+              <span style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                minWidth: '180px',
+                textAlign: 'center',
+                color: '#111827'
+              }}>
+                {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </span>
+              <button
+                onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}
+                style={{
+                  padding: '0.5rem',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '1.25rem',
+                  lineHeight: '1',
+                  minWidth: '40px',
+                  minHeight: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        {loading ? (
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '0.75rem',
+            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+            padding: '3rem',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📅</div>
+            <p style={{ color: '#6b7280', fontSize: '1rem' }}>Loading events...</p>
+          </div>
+        ) : (
+          viewMode === 'month' ? renderMonthView() : renderListView()
         )}
       </div>
-
-      {/* Content */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
-          Loading events...
-        </div>
-      ) : (
-        viewMode === 'month' ? renderMonthView() : renderListView()
-      )}
 
       {/* Band Details Modal */}
       {showBandDetails && renderBandDetails(showBandDetails)}

@@ -6,6 +6,7 @@ const MessagesView = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [activeChannel, setActiveChannel] = useState('general');
+  const [showChannels, setShowChannels] = useState(false);
   const messagesEndRef = useRef(null);
 
   const channels = [
@@ -64,7 +65,7 @@ const MessagesView = () => {
 
     const message = {
       id: Date.now(),
-      author: user.display_name || user.email,
+      author: user.display_name || user.first_name || user.email,
       authorId: user.id,
       message: newMessage.trim(),
       timestamp: new Date().toISOString()
@@ -88,9 +89,9 @@ const MessagesView = () => {
     if (diffDays > 0) {
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } else if (diffHours > 0) {
-      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      return `${diffHours}h ago`;
     } else if (diffMins > 0) {
-      return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+      return `${diffMins}m ago`;
     } else {
       return 'Just now';
     }
@@ -104,191 +105,357 @@ const MessagesView = () => {
     return (sampleMessages[channelId] || []).length;
   };
 
-  return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 100px)', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Channels Sidebar */}
-      <div style={{
-        width: '250px',
-        backgroundColor: 'white',
-        borderRight: '1px solid #ddd',
-        overflowY: 'auto'
-      }}>
-        <div style={{ padding: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-            Channels
-          </h2>
-          
-          {channels.map((channel) => (
-            <div
-              key={channel.id}
-              onClick={() => setActiveChannel(channel.id)}
-              style={{
-                padding: '1rem',
-                marginBottom: '0.5rem',
-                backgroundColor: activeChannel === channel.id ? '#e3f2fd' : 'transparent',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-            >
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: '0.25rem'
-              }}>
-                <div style={{ fontWeight: '600' }}>{channel.name}</div>
-                {getMessageCount(channel.id) > 0 && (
-                  <span style={{
-                    backgroundColor: '#2196F3',
-                    color: 'white',
-                    fontSize: '0.75rem',
-                    padding: '0.125rem 0.5rem',
-                    borderRadius: '12px'
-                  }}>
-                    {getMessageCount(channel.id)}
-                  </span>
-                )}
-              </div>
-              <div style={{ fontSize: '0.875rem', color: '#666' }}>
-                {channel.description}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+  const styles = {
+    container: {
+      height: 'calc(100vh - 60px)',
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: '#f9fafb',
+      position: 'relative'
+    },
+    header: {
+      backgroundColor: '#ffffff',
+      borderBottom: '1px solid #e5e7eb',
+      padding: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+    },
+    channelButton: {
+      backgroundColor: '#f3f4f6',
+      border: '1px solid #e5e7eb',
+      borderRadius: '0.75rem',
+      padding: '0.5rem 1rem',
+      fontSize: '0.875rem',
+      fontWeight: '600',
+      color: '#111827',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      minHeight: '44px'
+    },
+    messagesContainer: {
+      flex: 1,
+      overflowY: 'auto',
+      padding: '1rem',
+      WebkitOverflowScrolling: 'touch'
+    },
+    message: {
+      marginBottom: '1rem',
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '0.75rem'
+    },
+    messageBubble: {
+      maxWidth: '85%',
+      borderRadius: '0.75rem',
+      padding: '0.75rem',
+      wordWrap: 'break-word'
+    },
+    messageAvatar: {
+      width: '36px',
+      height: '36px',
+      borderRadius: '50%',
+      backgroundColor: '#0891b2',
+      color: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: '600',
+      fontSize: '0.875rem',
+      flexShrink: 0
+    },
+    inputContainer: {
+      backgroundColor: '#ffffff',
+      borderTop: '1px solid #e5e7eb',
+      padding: '1rem',
+      display: 'flex',
+      gap: '0.75rem',
+      alignItems: 'center'
+    },
+    input: {
+      flex: 1,
+      padding: '0.75rem',
+      border: '1px solid #e5e7eb',
+      borderRadius: '0.75rem',
+      fontSize: '1rem',
+      outline: 'none',
+      minHeight: '44px'
+    },
+    sendButton: {
+      backgroundColor: '#0891b2',
+      color: 'white',
+      border: 'none',
+      borderRadius: '0.75rem',
+      padding: '0 1.5rem',
+      fontSize: '1rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+      minHeight: '44px',
+      minWidth: '80px',
+      transition: 'all 0.2s'
+    },
+    channelModal: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'flex-end',
+      zIndex: 1000
+    },
+    channelSheet: {
+      backgroundColor: '#ffffff',
+      width: '100%',
+      maxHeight: '70vh',
+      borderRadius: '1rem 1rem 0 0',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch'
+    },
+    channelHeader: {
+      padding: '1.5rem',
+      borderBottom: '1px solid #e5e7eb',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    },
+    channelItem: {
+      padding: '1rem 1.5rem',
+      borderBottom: '1px solid #f3f4f6',
+      cursor: 'pointer',
+      transition: 'background-color 0.2s',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between'
+    }
+  };
 
-      {/* Chat Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#f5f5f5' }}>
-        {/* Channel Header */}
-        <div style={{
-          backgroundColor: 'white',
-          padding: '1rem 1.5rem',
-          borderBottom: '1px solid #ddd'
-        }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-            {channels.find(c => c.id === activeChannel)?.name}
-          </h3>
-          <p style={{ fontSize: '0.875rem', color: '#666' }}>
-            {channels.find(c => c.id === activeChannel)?.description}
+  const currentChannel = channels.find(c => c.id === activeChannel);
+
+  return (
+    <div style={styles.container}>
+      {/* Header */}
+      <div style={styles.header}>
+        <div>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '700',
+            color: '#111827',
+            marginBottom: '0.25rem'
+          }}>
+            {currentChannel?.name}
+          </h2>
+          <p style={{
+            fontSize: '0.75rem',
+            color: '#6b7280'
+          }}>
+            {currentChannel?.description}
           </p>
         </div>
+        <button
+          style={styles.channelButton}
+          onClick={() => setShowChannels(true)}
+        >
+          <span>📋</span>
+          <span>Channels</span>
+        </button>
+      </div>
 
-        {/* Messages */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '1.5rem'
-        }}>
-          {messages.length === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              color: '#666',
-              padding: '3rem'
-            }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💬</div>
-              <p>No messages yet. Start the conversation!</p>
-            </div>
-          ) : (
-            messages.map((msg) => (
+      {/* Messages */}
+      <div style={styles.messagesContainer}>
+        {messages.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '3rem',
+            color: '#6b7280'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>💬</div>
+            <p style={{ fontSize: '0.875rem' }}>No messages yet. Start the conversation!</p>
+          </div>
+        ) : (
+          messages.map((msg) => {
+            const isOwnMessage = msg.authorId === user?.id;
+            const initials = msg.author.split(' ').map(n => n[0]).join('').toUpperCase();
+            
+            return (
               <div
                 key={msg.id}
                 style={{
-                  marginBottom: '1.5rem',
-                  display: 'flex',
-                  flexDirection: msg.authorId === user.id ? 'row-reverse' : 'row'
+                  ...styles.message,
+                  flexDirection: isOwnMessage ? 'row-reverse' : 'row'
                 }}
               >
-                <div style={{
-                  maxWidth: '70%',
-                  backgroundColor: msg.authorId === user.id ? '#2196F3' : 'white',
-                  color: msg.authorId === user.id ? 'white' : '#333',
-                  padding: '1rem',
-                  borderRadius: '8px',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                }}>
+                {!isOwnMessage && (
                   <div style={{
-                    fontWeight: '600',
-                    marginBottom: '0.25rem',
-                    fontSize: '0.875rem'
+                    ...styles.messageAvatar,
+                    backgroundColor: msg.authorId === 'admin' ? '#f59e0b' : '#0891b2'
                   }}>
-                    {msg.author}
+                    {initials}
                   </div>
-                  <div style={{ marginBottom: '0.5rem' }}>
-                    {msg.message}
-                  </div>
+                )}
+                <div>
+                  {!isOwnMessage && (
+                    <div style={{
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '0.25rem',
+                      marginLeft: '0.25rem'
+                    }}>
+                      {msg.author}
+                    </div>
+                  )}
                   <div style={{
-                    fontSize: '0.75rem',
-                    opacity: 0.8
+                    ...styles.messageBubble,
+                    backgroundColor: isOwnMessage ? '#0891b2' : '#ffffff',
+                    color: isOwnMessage ? '#ffffff' : '#111827',
+                    border: isOwnMessage ? 'none' : '1px solid #e5e7eb',
+                    marginLeft: isOwnMessage ? 'auto' : '0'
                   }}>
-                    {formatTimestamp(msg.timestamp)}
+                    <div style={{ marginBottom: '0.25rem' }}>
+                      {msg.message}
+                    </div>
+                    <div style={{
+                      fontSize: '0.625rem',
+                      opacity: 0.7
+                    }}>
+                      {formatTimestamp(msg.timestamp)}
+                    </div>
                   </div>
                 </div>
               </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Message Input */}
-        <form
-          onSubmit={handleSendMessage}
-          style={{
-            backgroundColor: 'white',
-            padding: '1rem 1.5rem',
-            borderTop: '1px solid #ddd',
-            display: 'flex',
-            gap: '1rem'
-          }}
-        >
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={`Message #${activeChannel}`}
-            style={{
-              flex: 1,
-              padding: '0.75rem',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '1rem'
-            }}
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim()}
-            style={{
-              backgroundColor: '#2196F3',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              fontWeight: '500',
-              cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-              opacity: newMessage.trim() ? 1 : 0.6
-            }}
-          >
-            Send
-          </button>
-        </form>
+            );
+          })
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Mobile Styles */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .chat-container {
-            flex-direction: column;
-          }
-          
-          .channels-sidebar {
-            width: 100% !important;
-            height: auto !important;
-            border-right: none !important;
-            border-bottom: 1px solid #ddd;
-          }
-        }
-      `}</style>
+      {/* Message Input */}
+      <form onSubmit={handleSendMessage} style={styles.inputContainer}>
+        <input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder={`Message ${currentChannel?.name || ''}`}
+          style={styles.input}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#0891b2';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = '#e5e7eb';
+          }}
+        />
+        <button
+          type="submit"
+          disabled={!newMessage.trim()}
+          style={{
+            ...styles.sendButton,
+            opacity: newMessage.trim() ? 1 : 0.5,
+            cursor: newMessage.trim() ? 'pointer' : 'not-allowed'
+          }}
+          onMouseEnter={(e) => {
+            if (newMessage.trim()) {
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          Send
+        </button>
+      </form>
+
+      {/* Channel Selection Modal */}
+      {showChannels && (
+        <div
+          style={styles.channelModal}
+          onClick={() => setShowChannels(false)}
+        >
+          <div
+            style={styles.channelSheet}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={styles.channelHeader}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                color: '#111827'
+              }}>
+                Select Channel
+              </h3>
+              <button
+                onClick={() => setShowChannels(false)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  color: '#6b7280',
+                  cursor: 'pointer',
+                  padding: '0.5rem'
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div>
+              {channels.map((channel) => (
+                <div
+                  key={channel.id}
+                  style={{
+                    ...styles.channelItem,
+                    backgroundColor: activeChannel === channel.id ? '#ecfeff' : 'transparent'
+                  }}
+                  onClick={() => {
+                    setActiveChannel(channel.id);
+                    setShowChannels(false);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = activeChannel === channel.id ? '#ecfeff' : 'transparent';
+                  }}
+                >
+                  <div>
+                    <div style={{
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      color: '#111827',
+                      marginBottom: '0.25rem'
+                    }}>
+                      {channel.name}
+                    </div>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      color: '#6b7280'
+                    }}>
+                      {channel.description}
+                    </div>
+                  </div>
+                  {getMessageCount(channel.id) > 0 && (
+                    <span style={{
+                      backgroundColor: '#0891b2',
+                      color: 'white',
+                      fontSize: '0.75rem',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '1rem',
+                      fontWeight: '600'
+                    }}>
+                      {getMessageCount(channel.id)}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

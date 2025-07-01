@@ -5,6 +5,7 @@ import { rsvpService } from '../services/rsvpService';
 import { eventService } from '../services/api';
 
 const HomeView = ({ setActiveTab }) => {
+  console.log('HomeView mounted, setActiveTab:', typeof setActiveTab);
   const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState(null);
@@ -381,9 +382,94 @@ const HomeView = ({ setActiveTab }) => {
           </div>
         </div>
 
+        {/* Hourly Forecast */}
+        {weather?.hourly && (
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>
+              <span>🕐</span> Hourly Forecast
+            </h2>
+            <div style={{
+              display: 'flex',
+              overflowX: 'auto',
+              gap: '0.75rem',
+              paddingBottom: '0.5rem',
+              WebkitOverflowScrolling: 'touch'
+            }}>
+              {weather.hourly.slice(0, 12).map((hour, index) => (
+                <div key={index} style={{
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '0.5rem',
+                  padding: '0.75rem',
+                  minWidth: '80px',
+                  textAlign: 'center',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                    {hour.time}
+                  </div>
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>
+                    {hour.icon}
+                  </div>
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>
+                    {hour.temp}°
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 7-Day Forecast */}
+        {weather?.daily && (
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>
+              <span>📆</span> 7-Day Forecast
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {weather.daily.map((day, index) => (
+                <div key={index} style={{
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '0.5rem',
+                  padding: '0.75rem 1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ fontSize: '1.25rem' }}>{day.icon}</div>
+                    <div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>
+                        {day.day}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                        {day.condition}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>
+                      {day.high}°
+                    </span>
+                    <span style={{ fontSize: '0.875rem', color: '#6b7280', marginLeft: '0.5rem' }}>
+                      {day.low}°
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Events Section */}
         <div style={styles.card}>
-          <h2 style={styles.cardTitle}>
+          <h2 
+            style={{...styles.cardTitle, cursor: 'pointer'}}
+            onClick={() => {
+              console.log('Title clicked, calling setActiveTab');
+              setActiveTab('calendar');
+            }}
+          >
             <span>📅</span> Upcoming Events
           </h2>
           
@@ -392,16 +478,28 @@ const HomeView = ({ setActiveTab }) => {
           ) : (
             <div>
               {upcomingEvents.map(event => (
-                <div key={event.id} style={{
-                  backgroundColor: '#f3f4f6',
-                  borderRadius: '0.75rem',
-                  padding: '1rem',
-                  border: '1px solid #e5e7eb',
-                  marginBottom: '1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onClick={() => setActiveTab('calendar')}>
+                <div 
+                  key={event.id} 
+                  style={{
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    border: '1px solid #e5e7eb',
+                    marginBottom: '1rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onClick={() => {
+                    console.log('Event clicked, calling setActiveTab');
+                    setActiveTab('calendar');
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#e5e7eb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                >
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
