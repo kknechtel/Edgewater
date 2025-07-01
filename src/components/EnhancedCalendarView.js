@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { eventService } from '../services/api';
 import { bandGuideData } from '../data/bandGuideData';
 import { rsvpService } from '../services/rsvpService';
@@ -18,6 +19,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
   const [showTournamentModal, setShowTournamentModal] = useState(false);
   const [commentInputs, setCommentInputs] = useState({});
   const { user } = useAuth();
+  const { isDarkMode } = useTheme();
 
   // Tournament form state
   const [tournamentForm, setTournamentForm] = useState({
@@ -1095,13 +1097,13 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
 
   return (
     <div style={{
-      backgroundColor: '#f9fafb',
+      backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb',
       borderRadius: '0.5rem',
       padding: '0.75rem',
       marginBottom: '0.5rem',
       cursor: 'pointer',
       transition: 'all 0.2s',
-      border: '1px solid #e5e7eb'
+      border: `1px solid ${isDarkMode ? '#475569' : '#e5e7eb'}`
     }}
     onClick={onToggle}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
@@ -1125,11 +1127,11 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
             fontSize: '1rem',
             fontWeight: '600',
             margin: '0 0 0.25rem 0',
-            color: '#111827'
+            color: isDarkMode ? '#f1f5f9' : '#111827'
           }}>
             {event.title}
             {event.bandData && event.bandData.rating && (
-              <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
+              <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: isDarkMode ? '#94a3b8' : '#6b7280' }}>
                 {'⭐'.repeat(event.bandData.rating)}
               </span>
             )}
@@ -1137,11 +1139,12 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
           
           <div style={{
             fontSize: '0.875rem',
-            color: '#6b7280',
+            color: isDarkMode ? '#94a3b8' : '#6b7280',
             display: 'flex',
             alignItems: 'center',
             gap: '1rem',
-            flexWrap: 'wrap'
+            flexWrap: 'wrap',
+            marginBottom: '0.5rem'
           }}>
             <span>⏰ {event.event_time}</span>
             <span>📍 {event.location || 'Beach Club'}</span>
@@ -1149,17 +1152,82 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
               <span>👥 {event.attendees.length} going</span>
             )}
           </div>
+
+          {/* RSVP Button - Always Visible */}
+          <div style={{ marginTop: '0.5rem' }}>
+            {user ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRSVP();
+                }}
+                style={{
+                  padding: '0.375rem 0.75rem',
+                  backgroundColor: rsvpService.getUserRSVPStatus(event.id, user?.id) === 'going' 
+                    ? '#10b981' 
+                    : '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  marginRight: '0.5rem'
+                }}
+              >
+                {rsvpService.getUserRSVPStatus(event.id, user?.id) === 'going' ? '✓ Going' : '+ RSVP'}
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = '/login';
+                }}
+                style={{
+                  padding: '0.375rem 0.75rem',
+                  backgroundColor: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  marginRight: '0.5rem'
+                }}
+              >
+                Login to RSVP
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
+              style={{
+                padding: '0.375rem 0.75rem',
+                backgroundColor: 'transparent',
+                color: isDarkMode ? '#94a3b8' : '#6b7280',
+                border: `1px solid ${isDarkMode ? '#475569' : '#d1d5db'}`,
+                borderRadius: '0.375rem',
+                fontSize: '0.75rem',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              {expanded ? 'Less' : 'More'} ▼
+            </button>
+          </div>
           
           {expanded && (
             <div style={{
               marginTop: '0.75rem',
               paddingTop: '0.75rem',
-              borderTop: '1px solid #e5e7eb'
+              borderTop: `1px solid ${isDarkMode ? '#475569' : '#e5e7eb'}`
             }}>
               {event.description && (
                 <p style={{
                   fontSize: '0.875rem',
-                  color: '#374151',
+                  color: isDarkMode ? '#cbd5e1' : '#374151',
                   marginBottom: '0.5rem',
                   lineHeight: '1.5'
                 }}>

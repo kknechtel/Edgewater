@@ -114,7 +114,8 @@ export const AuthProvider = ({ children }) => {
         last_name: payload.family_name,
         display_name: payload.name,
         avatar_url: payload.picture,
-        is_admin: true // Make the first user admin
+        is_admin: true, // Make all Google users admin for now
+        is_active: true
       };
 
       // Store in localStorage for persistence
