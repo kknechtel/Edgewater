@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchWeatherData, fetchSurfReport } from '../services/weatherService';
 import { rsvpService } from '../services/rsvpService';
 import { eventService } from '../services/api';
+import { bandGuideData } from '../data/bandGuideData';
 import HomeEventsSection from './HomeEventsSection';
 
 const HomeView = ({ setActiveTab }) => {
@@ -48,10 +49,67 @@ const HomeView = ({ setActiveTab }) => {
     }
   };
 
+  const parseBandDates = (dateString) => {
+    const currentYear = new Date().getFullYear();
+    const dates = dateString.split(',').map(d => d.trim());
+    return dates.map(dateStr => {
+      const parts = dateStr.split(' ');
+      if (parts.length >= 2) {
+        const month = parts[0];
+        const day = parts[1];
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const monthIndex = monthNames.indexOf(month);
+        if (monthIndex !== -1 && day) {
+          const parsedDate = new Date(currentYear, monthIndex, parseInt(day));
+          return parsedDate;
+        }
+      }
+      return null;
+    }).filter(date => date !== null);
+  };
+
   const loadUpcomingEvents = async () => {
     try {
-      const response = await eventService.getEvents();
-      const allEvents = response.data || [];
+      // Load events from backend API  
+      let apiEvents = [];
+      try {
+        const response = await eventService.getEvents();
+        apiEvents = Array.isArray(response) ? response : (response.data || []);
+      } catch (error) {
+        console.log('API events failed, using empty array:', error);
+        apiEvents = [];
+      }
+      
+      // Load band events from bandGuideData (same as calendar)
+      const bandEvents = [];
+      bandGuideData.categories.forEach(category => {
+        category.bands.forEach(band => {
+          if (band.date) {
+            const dates = parseBandDates(band.date);
+            const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
+            
+            dates.forEach((date, index) => {
+              if (date) {
+                const bandEvent = {
+                  id: `band-${band.name}-${date.getTime()}`,
+                  title: band.name,
+                  description: band.description,
+                  event_date: date.toISOString().split('T')[0],
+                  event_time: times[index] || times[0],
+                  location: 'Beach Stage',
+                  event_type: 'concert',
+                  source: 'band'
+                };
+                bandEvents.push(bandEvent);
+              }
+            });
+          }
+        });
+      });
+
+      // Combine all events
+      const allEvents = [...apiEvents, ...bandEvents];
       
       // Filter and sort upcoming events
       const now = new Date();
@@ -70,7 +128,6 @@ const HomeView = ({ setActiveTab }) => {
       setUpcomingEvents(enrichedEvents);
     } catch (error) {
       console.error('Error loading events:', error);
-      // Just set empty array - let the UI handle showing "no events" message
       setUpcomingEvents([]);
     }
   };
