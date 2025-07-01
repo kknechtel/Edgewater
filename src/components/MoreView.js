@@ -283,31 +283,84 @@ const MoreView = ({ setActiveTab }) => {
             )}
           </div>
           
-          <button
-            style={{
-              backgroundColor: '#0891b2',
-              color: 'white',
-              border: 'none',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.75rem',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              marginTop: '1rem',
-              width: '100%'
-            }}
-            onClick={() => {
-              if ('share' in navigator) {
-                navigator.share({
-                  title: 'Edgewater Beach Club',
-                  text: 'Check out the Edgewater Beach Club app!',
-                  url: window.location.origin
-                });
-              }
-            }}
-          >
-            Share App
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+            <button
+              style={{
+                backgroundColor: '#10b981',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+              onClick={() => {
+                // Check if browser supports PWA installation
+                if ('serviceWorker' in navigator) {
+                  // For iOS Safari
+                  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    alert('To install this app:\n\n1. Tap the Share button (⎋)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app');
+                  }
+                  // For Android Chrome
+                  else if (window.matchMedia('(display-mode: browser)').matches) {
+                    alert('To install this app:\n\n1. Tap the menu button (⋮)\n2. Tap "Add to Home screen"\n3. Tap "Add" to install the app');
+                  }
+                  // For other browsers
+                  else {
+                    alert('To install this app:\n\n1. Look for an "Install" or "Add to Home Screen" option in your browser menu\n2. Follow the prompts to install the app on your device');
+                  }
+                } else {
+                  alert('App installation is not supported in this browser.');
+                }
+              }}
+            >
+              <span>📱</span>
+              Install as App
+            </button>
+            
+            <button
+              style={{
+                backgroundColor: '#0891b2',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+              onClick={() => {
+                if ('share' in navigator) {
+                  navigator.share({
+                    title: 'Edgewater Beach Club',
+                    text: 'Check out the Edgewater Beach Club app!',
+                    url: window.location.origin
+                  });
+                } else {
+                  // Fallback for browsers without Web Share API
+                  navigator.clipboard.writeText(window.location.origin).then(() => {
+                    alert('App link copied to clipboard!');
+                  }).catch(() => {
+                    alert(`Share this link: ${window.location.origin}`);
+                  });
+                }
+              }}
+            >
+              <span>🔗</span>
+              Share App
+            </button>
+          </div>
         </div>
       </div>
 
