@@ -70,33 +70,8 @@ const HomeView = ({ setActiveTab }) => {
       setUpcomingEvents(enrichedEvents);
     } catch (error) {
       console.error('Error loading events:', error);
-      
-      // Fallback to demo events when backend is unavailable
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const nextWeek = new Date();
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      
-      const fallbackEvents = [
-        {
-          id: 'demo-1',
-          title: 'Summer Beach Concert',
-          event_date: tomorrow.toISOString().split('T')[0],
-          event_time: '6:00 PM',
-          attendeeCount: 24,
-          userRsvp: false
-        },
-        {
-          id: 'demo-2', 
-          title: 'Bags Tournament',
-          event_date: nextWeek.toISOString().split('T')[0],
-          event_time: '2:00 PM',
-          attendeeCount: 16,
-          userRsvp: false
-        }
-      ];
-      
-      setUpcomingEvents(fallbackEvents);
+      // Just set empty array - let the UI handle showing "no events" message
+      setUpcomingEvents([]);
     }
   };
 

@@ -14,7 +14,37 @@ const HomeEventsSection = ({ upcomingEvents, setActiveTab, handleRsvp, getEventD
       </h2>
       
       {upcomingEvents.length === 0 ? (
-        <p style={{ color: '#6b7280' }}>No upcoming events scheduled</p>
+        <div style={{
+          textAlign: 'center',
+          padding: '2rem',
+          backgroundColor: '#f9fafb',
+          borderRadius: '0.75rem',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📅</div>
+          <p style={{ 
+            color: '#6b7280', 
+            marginBottom: '1rem',
+            fontSize: '1rem'
+          }}>
+            No upcoming events found
+          </p>
+          <button
+            onClick={() => setActiveTab('calendar')}
+            style={{
+              backgroundColor: '#0891b2',
+              color: 'white',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.75rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            View Calendar
+          </button>
+        </div>
       ) : (
         <div>
           {upcomingEvents.map(event => (
