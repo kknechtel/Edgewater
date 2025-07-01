@@ -132,7 +132,6 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
         commentCount: commentsService.getCommentCount(event.id)
       }));
       
-      console.log('Loaded events:', enrichedEvents.length, enrichedEvents);
       setEvents(enrichedEvents);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -189,12 +188,12 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
 
   const getEventTypeColor = (type) => {
     const colors = {
-      party: '#fbbf24',
-      concert: '#a78bfa',
-      gathering: '#34d399',
-      dinner: '#f472b6',
-      tournament: '#60a5fa',
-      other: '#94a3b8'
+      party: '#FF6B6B',     // Coral red
+      concert: '#4ECDC4',   // Turquoise
+      gathering: '#45B7D1', // Ocean blue
+      dinner: '#F7DC6F',    // Sandy yellow
+      tournament: '#F39C12', // Orange sunset
+      other: '#1ABC9C'      // Tropical teal
     };
     return colors[type] || colors.other;
   };
@@ -725,7 +724,14 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
   };
 
   return (
-    <div style={{ maxWidth: '1024px', margin: '0 auto', padding: '1rem' }}>
+    <div style={{ 
+      maxWidth: '1024px', 
+      margin: '0 auto', 
+      padding: '1rem',
+      background: 'linear-gradient(135deg, #87CEEB 0%, #98E4E8 50%, #FFE4B5 100%)', // Sky to sand gradient
+      minHeight: '100vh',
+      borderRadius: '0'
+    }}>
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -735,8 +741,15 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
         flexWrap: 'wrap',
         gap: '0.5rem'
       }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-          📅 Beach Events
+        <h1 style={{ 
+          fontSize: '2rem', 
+          fontWeight: '800', 
+          margin: 0,
+          color: '#1A365D',
+          textShadow: '2px 2px 4px rgba(255,255,255,0.8)',
+          letterSpacing: '1px'
+        }}>
+          🏖️ Beach Events
         </h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
@@ -1076,12 +1089,12 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
 const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddComment, commentInput, onCommentInputChange, isOwner, currentUser, isDarkMode }) => {
   const getEventTypeColor = (type) => {
     const colors = {
-      party: '#fbbf24',
-      concert: '#a78bfa',
-      gathering: '#34d399',
-      dinner: '#f472b6',
-      tournament: '#60a5fa',
-      other: '#94a3b8'
+      party: '#FF6B6B',     // Coral red
+      concert: '#4ECDC4',   // Turquoise
+      gathering: '#45B7D1', // Ocean blue
+      dinner: '#F7DC6F',    // Sandy yellow
+      tournament: '#F39C12', // Orange sunset
+      other: '#1ABC9C'      // Tropical teal
     };
     return colors[type] || colors.other;
   };
@@ -1100,13 +1113,19 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
 
   return (
     <div style={{
-      backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb',
-      borderRadius: '0.5rem',
-      padding: '0.75rem',
-      marginBottom: '0.5rem',
+      background: 'linear-gradient(135deg, #FFE082 0%, #FFF3E0 100%)', // Sunny beach gradient
+      borderRadius: '1rem',
+      padding: '1rem',
+      marginBottom: '0.75rem',
       cursor: 'pointer',
-      transition: 'all 0.2s',
-      border: `1px solid ${isDarkMode ? '#475569' : '#e5e7eb'}`
+      transition: 'all 0.3s ease',
+      border: '2px solid #FFD54F',
+      boxShadow: '0 8px 20px rgba(255, 183, 77, 0.2)',
+      transform: expanded ? 'scale(1.02)' : 'scale(1)',
+      ':hover': {
+        transform: 'scale(1.01)',
+        boxShadow: '0 12px 24px rgba(255, 183, 77, 0.3)'
+      }
     }}
     onClick={onToggle}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
@@ -1127,38 +1146,85 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
         
         <div style={{ flex: 1 }}>
           <h4 style={{
-            fontSize: '1rem',
-            fontWeight: '600',
-            margin: '0 0 0.25rem 0',
-            color: isDarkMode ? '#f1f5f9' : '#111827'
+            fontSize: '1.25rem',
+            fontWeight: '700',
+            margin: '0 0 0.5rem 0',
+            color: '#1A365D', // Deep blue for excellent readability
+            textShadow: '1px 1px 2px rgba(255,255,255,0.8)'
           }}>
             {event.title}
             {event.bandData && event.bandData.rating && (
-              <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: isDarkMode ? '#94a3b8' : '#6b7280' }}>
+              <span style={{ marginLeft: '0.5rem', fontSize: '1rem', color: '#F39C12' }}>
                 {'⭐'.repeat(event.bandData.rating)}
               </span>
             )}
           </h4>
           
           <div style={{
-            fontSize: '0.875rem',
-            color: isDarkMode ? '#94a3b8' : '#6b7280',
+            fontSize: '1rem',
+            color: '#2C5282', // Strong blue for readability
             display: 'flex',
             alignItems: 'center',
             gap: '1rem',
             flexWrap: 'wrap',
-            marginBottom: '0.5rem'
+            marginBottom: '0.75rem',
+            fontWeight: '500'
           }}>
-            <span>⏰ {event.event_time}</span>
-            <span>📍 {event.location || 'Beach Club'}</span>
+            <span style={{background: 'rgba(255,255,255,0.7)', padding: '0.25rem 0.5rem', borderRadius: '0.5rem'}}>
+              ⏰ {event.event_time}
+            </span>
+            <span style={{background: 'rgba(255,255,255,0.7)', padding: '0.25rem 0.5rem', borderRadius: '0.5rem'}}>
+              📍 {event.location || 'Beach Club'}
+            </span>
             {event.attendees && event.attendees.length > 0 && (
-              <span>👥 {event.attendees.length} going</span>
+              <span style={{background: 'rgba(76, 205, 196, 0.3)', padding: '0.25rem 0.5rem', borderRadius: '0.5rem', color: '#1A365D', fontWeight: '600'}}>
+                👥 {event.attendees.length} going
+              </span>
             )}
           </div>
 
-          {/* RSVP Button - Always Visible */}
-          <div style={{ marginTop: '0.5rem' }}>
-            {console.log('EventCard rendering RSVP for:', event.title, 'User:', currentUser?.email)}
+          {/* Show Attendees List */}
+          {event.attendees && event.attendees.length > 0 && (
+            <div style={{
+              background: 'rgba(255,255,255,0.8)',
+              borderRadius: '0.75rem',
+              padding: '0.75rem',
+              marginBottom: '0.75rem',
+              border: '1px solid #4ECDC4'
+            }}>
+              <h5 style={{
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                margin: '0 0 0.5rem 0',
+                color: '#1A365D'
+              }}>🏖️ Who's Going:</h5>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem'
+              }}>
+                {event.attendees.map((attendee, index) => (
+                  <span
+                    key={attendee.userId || index}
+                    style={{
+                      fontSize: '0.875rem',
+                      padding: '0.375rem 0.75rem',
+                      backgroundColor: '#4ECDC4',
+                      color: 'white',
+                      borderRadius: '1rem',
+                      fontWeight: '500',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {attendee.userName}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* RSVP Button - Always Visible & Vibrant */}
+          <div style={{ marginTop: '0.75rem' }}>
             {currentUser ? (
               <button
                 onClick={(e) => {
@@ -1166,20 +1232,24 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
                   onRSVP();
                 }}
                 style={{
-                  padding: '0.375rem 0.75rem',
+                  padding: '0.75rem 1.5rem',
                   backgroundColor: rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' 
-                    ? '#10b981' 
-                    : '#3b82f6',
+                    ? '#4ECDC4' 
+                    : '#FF6B6B',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '0.375rem',
-                  fontSize: '0.75rem',
-                  fontWeight: '500',
+                  borderRadius: '2rem',
+                  fontSize: '1rem',
+                  fontWeight: '700',
                   cursor: 'pointer',
-                  marginRight: '0.5rem'
+                  marginRight: '0.75rem',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  transition: 'all 0.3s ease',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
                 }}
               >
-                {rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' ? '✓ Going' : '+ RSVP'}
+                {rsvpService.getUserRSVPStatus(event.id, currentUser?.id) === 'going' ? '🏖️ I\'m Going!' : '🌊 RSVP Now!'}
               </button>
             ) : (
               <button
@@ -1188,18 +1258,22 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
                   window.location.href = '/login';
                 }}
                 style={{
-                  padding: '0.375rem 0.75rem',
-                  backgroundColor: '#6b7280',
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#F39C12',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '0.375rem',
-                  fontSize: '0.75rem',
-                  fontWeight: '500',
+                  borderRadius: '2rem',
+                  fontSize: '1rem',
+                  fontWeight: '700',
                   cursor: 'pointer',
-                  marginRight: '0.5rem'
+                  marginRight: '0.75rem',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  transition: 'all 0.3s ease',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
                 }}
               >
-                Login to RSVP
+                🏄‍♂️ Login to Join!
               </button>
             )}
             <button
@@ -1208,17 +1282,18 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
                 onToggle();
               }}
               style={{
-                padding: '0.375rem 0.75rem',
-                backgroundColor: 'transparent',
-                color: isDarkMode ? '#94a3b8' : '#6b7280',
-                border: `1px solid ${isDarkMode ? '#475569' : '#d1d5db'}`,
-                borderRadius: '0.375rem',
-                fontSize: '0.75rem',
-                fontWeight: '500',
-                cursor: 'pointer'
+                padding: '0.5rem 1rem',
+                backgroundColor: 'rgba(255,255,255,0.8)',
+                color: '#1A365D',
+                border: '2px solid #45B7D1',
+                borderRadius: '1rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
               }}
             >
-              {expanded ? 'Less' : 'More'} ▼
+              {expanded ? '📝 Less Info' : '📝 More Info'} 
             </button>
           </div>
           
@@ -1226,14 +1301,19 @@ const EventCard = ({ event, expanded, onToggle, onEdit, onDelete, onRSVP, onAddC
             <div style={{
               marginTop: '0.75rem',
               paddingTop: '0.75rem',
-              borderTop: `1px solid ${isDarkMode ? '#475569' : '#e5e7eb'}`
+              borderTop: '2px solid #4ECDC4'
             }}>
               {event.description && (
                 <p style={{
-                  fontSize: '0.875rem',
-                  color: isDarkMode ? '#cbd5e1' : '#374151',
-                  marginBottom: '0.5rem',
-                  lineHeight: '1.5'
+                  fontSize: '1rem',
+                  color: '#1A365D',
+                  marginBottom: '0.75rem',
+                  lineHeight: '1.6',
+                  fontWeight: '500',
+                  background: 'rgba(255,255,255,0.8)',
+                  padding: '0.75rem',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #FFD54F'
                 }}>
                   {event.description}
                 </p>
