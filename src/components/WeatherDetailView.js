@@ -423,43 +423,149 @@ const WeatherDetailView = () => {
         <p style={styles.location}>📍 Sea Bright, NJ</p>
       </div>
 
-      {/* Tab Bar */}
-      <div style={styles.tabBar}>
-        {tabs.map(tab => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              style={{
-                ...styles.tab,
-                ...(isActive ? styles.activeTab : styles.inactiveTab)
-              }}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {/* Active indicator */}
-              {isActive && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '40px',
-                  height: '3px',
-                  backgroundColor: '#0891b2',
-                  borderRadius: '3px 3px 0 0'
-                }} />
-              )}
-              
-              <span style={{ fontSize: '1.25rem' }}>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Main Content with Sidebar */}
+      <div style={{
+        display: 'flex',
+        height: 'calc(100vh - 120px)',
+        backgroundColor: '#f9fafb',
+        flexDirection: window.innerWidth < 768 ? 'column' : 'row'
+      }}>
+        {/* Mobile Tab Bar (shows on top for mobile) */}
+        {window.innerWidth < 768 && (
+          <div style={{
+            display: 'flex',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #e5e7eb',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch'
+          }}>
+            {tabs.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  style={{
+                    flex: 1,
+                    minWidth: '80px',
+                    padding: '0.75rem',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: isActive ? '#0891b2' : '#6b7280',
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    position: 'relative'
+                  }}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {isActive && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: '40px',
+                      height: '3px',
+                      backgroundColor: '#0891b2',
+                      borderRadius: '3px 3px 0 0'
+                    }} />
+                  )}
+                  <span style={{ fontSize: '1.25rem' }}>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-      {/* Content */}
-      <div style={styles.content}>
-        {renderContent()}
+        {/* Content Area */}
+        <div style={{
+          flex: 1,
+          padding: '1rem',
+          overflowY: 'auto'
+        }}>
+          {renderContent()}
+        </div>
+
+        {/* Desktop Right Sidebar with Tabs */}
+        {window.innerWidth >= 768 && (
+          <div style={{
+            width: '200px',
+            backgroundColor: '#ffffff',
+            borderLeft: '1px solid #e5e7eb',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '-2px 0 4px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{
+              padding: '1rem',
+              borderBottom: '1px solid #e5e7eb',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              color: '#6b7280',
+              textAlign: 'center'
+            }}>
+              VIEW OPTIONS
+            </div>
+            
+            {tabs.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '1rem',
+                    border: 'none',
+                    backgroundColor: isActive ? '#0891b2' : 'transparent',
+                    color: isActive ? 'white' : '#6b7280',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    borderBottom: '1px solid #f3f4f6',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    position: 'relative'
+                  }}
+                  onClick={() => setActiveTab(tab.id)}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '4px',
+                      height: '60%',
+                      backgroundColor: '#ffffff',
+                      borderRadius: '0 4px 4px 0'
+                    }} />
+                  )}
+                  
+                  <span style={{ fontSize: '1.5rem' }}>{tab.icon}</span>
+                  <span style={{ textAlign: 'center', lineHeight: '1.2' }}>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
