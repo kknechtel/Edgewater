@@ -346,3 +346,68 @@ def get_admin_stats():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/admin/invite', methods=['POST'])
+@jwt_required()
+def invite_user():
+    try:
+        user_id = get_jwt_identity()
+        current_user = User.query.get(user_id)
+        
+        if not current_user or not current_user.is_admin:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        data = request.get_json()
+        
+        if not data.get('email'):
+            return jsonify({'error': 'Email is required'}), 400
+        
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=data['email']).first()
+        if existing_user:
+            return jsonify({'error': 'User with this email already exists'}), 409
+        
+        # Create new user with temporary password
+        user = User(
+            email=data['email'],
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            display_name=data.get('display_name'),
+            is_admin=data.get('is_admin', False),
+            is_active=True  # Activate user immediately upon invitation
+        )
+        
+        # Set a temporary password that they'll change upon first login
+        import secrets
+        temp_password = secrets.token_urlsafe(12)
+        user.set_password(temp_password)
+        
+        # Set beach member since date if provided
+        if data.get('beach_member_since'):
+            try:
+                user.beach_member_since = datetime.strptime(data['beach_member_since'], '%Y-%m-%d').date()
+            except:
+                pass
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        # In a real application, you would send an email here
+        # For now, we'll just return the invitation details
+        invitation_details = {
+            'user_id': user.id,
+            'email': user.email,
+            'temp_password': temp_password,
+            'message': data.get('message', ''),
+            'invited_by': current_user.display_name or current_user.email
+        }
+        
+        return jsonify({
+            'message': 'User invitation sent successfully',
+            'user': user.to_dict(),
+            'invitation_details': invitation_details
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

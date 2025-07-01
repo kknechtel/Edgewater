@@ -9,6 +9,7 @@ import Messages from './features/Messages';
 import BagsView from './BagsView';
 import HomeView from './features/HomeView';
 import UserProfile from './UserProfile';
+import AdminDashboard from './AdminDashboard';
 
 const MobileApp = () => {
   const { logout, user } = useAuth();
@@ -55,6 +56,7 @@ const MobileApp = () => {
     { id: 'bags', label: 'Bags', icon: '🎯' },
     { id: 'sasqwatch', label: 'SasqWatch', icon: '👣' },
     { id: 'messages', label: 'Chat', icon: '💭' },
+    ...(user?.is_admin ? [{ id: 'admin', label: 'Admin', icon: '👑' }] : []),
   ];
 
   const renderContent = () => {
@@ -69,6 +71,8 @@ const MobileApp = () => {
         return <SasqWatch />;
       case 'messages':
         return <Messages />;
+      case 'admin':
+        return user?.is_admin ? <AdminDashboard /> : <HomeView setActiveTab={setActiveTab} />;
       default:
         return <HomeView setActiveTab={setActiveTab} />;
     }
@@ -229,7 +233,7 @@ const MobileApp = () => {
               fontWeight: activeTab === tab.id ? '600' : '400',
               transition: 'color 0.2s',
               minWidth: 0,
-              maxWidth: '20%' // For 5 tabs
+              maxWidth: `${100 / tabs.length}%` // Dynamic based on tab count
             }}
           >
             <div style={{ position: 'relative', display: 'inline-block' }}>

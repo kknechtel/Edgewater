@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import UserInvitation from './UserInvitation';
 
 const AdminDashboard = () => {
   const { isAdmin, getAllUsers, updateUserAdmin, getAdminStats } = useAuth();
@@ -8,6 +9,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all', 'active', 'inactive', 'admin'
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (isAdmin()) {
@@ -51,6 +54,16 @@ const AdminDashboard = () => {
         alert('Failed to update admin status');
       }
     }
+  };
+
+  const handleInviteSuccess = (message) => {
+    setSuccessMessage(message);
+    loadData(); // Refresh user list
+    
+    // Clear success message after 5 seconds
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 5000);
   };
 
   const getFilteredUsers = () => {
@@ -152,6 +165,23 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Success Message */}
+      {successMessage && (
+        <div style={{
+          backgroundColor: '#d1fae5',
+          color: '#065f46',
+          padding: '0.75rem 1rem',
+          borderRadius: '0.5rem',
+          marginBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <span>✅</span>
+          {successMessage}
+        </div>
+      )}
+
       {/* User Management */}
       <div style={{
         backgroundColor: 'white',
@@ -171,7 +201,26 @@ const AdminDashboard = () => {
           <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0 }}>
             User Management
           </h2>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowInviteModal(true)}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.375rem'
+              }}
+            >
+              <span>👥</span>
+              Invite User
+            </button>
             {['all', 'active', 'inactive', 'admin'].map(f => (
               <button
                 key={f}
@@ -368,6 +417,14 @@ const AdminDashboard = () => {
         <UserDetailModal
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
+        />
+      )}
+
+      {/* User Invitation Modal */}
+      {showInviteModal && (
+        <UserInvitation
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={handleInviteSuccess}
         />
       )}
     </div>

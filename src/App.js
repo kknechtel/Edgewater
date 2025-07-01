@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import MobileApp from './components/MobileApp';
 import Login from './components/auth/Login';
+import Register from './components/auth/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <div className="App">
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/" element={<MobileApp />} />
             </Routes>
           </div>
