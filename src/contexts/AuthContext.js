@@ -17,28 +17,22 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is already logged in on app start
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const savedToken = localStorage.getItem('token');
-      if (savedToken) {
+      const savedUser = localStorage.getItem('user');
+      
+      if (savedToken && savedUser) {
         try {
-          const response = await fetch('/api/auth/me', {
-            headers: {
-              'Authorization': `Bearer ${savedToken}`
-            }
-          });
-          
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-            setToken(savedToken);
-          } else {
-            localStorage.removeItem('token');
-            setToken(null);
-          }
+          const userData = JSON.parse(savedUser);
+          setUser(userData);
+          setToken(savedToken);
+          console.log('User restored from localStorage:', userData);
         } catch (error) {
-          console.error('Auth check failed:', error);
+          console.error('Failed to restore user from localStorage:', error);
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
           setToken(null);
+          setUser(null);
         }
       }
       setLoading(false);
@@ -107,39 +101,39 @@ export const AuthProvider = ({ children }) => {
 
   const googleSignIn = async (googleData) => {
     try {
-      const response = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(googleData),
-      });
+      // Frontend-only Google authentication
+      const { token } = googleData;
+      
+      // Decode the JWT token to get user info
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      
+      const user = {
+        id: payload.sub,
+        email: payload.email,
+        first_name: payload.given_name,
+        last_name: payload.family_name,
+        display_name: payload.name,
+        avatar_url: payload.picture
+      };
 
-      // Check if response is JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        console.error('Non-JSON response:', await response.text());
-        return { success: false, error: 'Server error - invalid response format' };
-      }
-
-      const data = await response.json();
-
-      if (response.ok && data.access_token) {
-        localStorage.setItem('token', data.access_token);
-        setToken(data.access_token);
-        setUser(data.user);
-        return { success: true };
-      } else {
-        return { success: false, error: data.error || 'Google sign-in failed' };
-      }
+      // Store in localStorage for persistence
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      setToken(token);
+      setUser(user);
+      
+      console.log('User signed in:', user);
+      return { success: true };
     } catch (error) {
       console.error('Google sign-in error:', error);
-      return { success: false, error: 'Network error occurred' };
+      return { success: false, error: 'Authentication failed' };
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
     console.log('User logged out');
