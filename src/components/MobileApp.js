@@ -16,14 +16,8 @@ const MobileApp = () => {
   const { logout, user } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('home');
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [showProfile, setShowProfile] = useState(false);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     // Initialize notifications
@@ -53,11 +47,10 @@ const MobileApp = () => {
 
   const tabs = [
     { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'calendar', label: 'Events', icon: '🏖️' },
-    { id: 'bags', label: 'Bags', icon: '🎯' },
+    { id: 'calendar', label: 'Events', icon: '📅' },
+    { id: 'messages', label: 'Chat', icon: '💬' },
     { id: 'sasqwatch', label: 'SasqWatch', icon: '👣' },
-    { id: 'messages', label: 'Chat', icon: '💭' },
-    ...(user?.is_admin ? [{ id: 'admin', label: 'Admin', icon: '👑' }] : []),
+    { id: 'more', label: 'More', icon: '⚙️' }
   ];
 
   const renderContent = () => {
@@ -105,117 +98,14 @@ const MobileApp = () => {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: isDarkMode ? '#0f172a' : '#f0f9ff',
-      color: isDarkMode ? '#f1f5f9' : '#111827',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      backgroundColor: '#f9fafb',
       margin: 0,
-      padding: 0,
-      overflow: 'hidden'
+      padding: 0
     }}>
-      {/* Header - Only show on non-home pages */}
-      {activeTab !== 'home' && (
-        <header style={{
-          backgroundColor: '#0891b2',
-          color: 'white',
-          padding: '1rem',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h1 style={{ 
-            margin: 0, 
-            fontSize: '1.25rem', 
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            🏖️ Clubbers
-          </h1>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={toggleTheme}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: 'none',
-                padding: '0.5rem',
-                borderRadius: '0.5rem',
-                fontSize: '1.25rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </button>
-            {user ? (
-              <>
-                <button
-                  onClick={() => setShowProfile(true)}
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  👤 Profile
-                </button>
-                <button
-                  onClick={logout}
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => window.location.href = '/login'}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  cursor: 'pointer'
-                }}
-              >
-                Login
-              </button>
-            )}
-          </div>
-        </header>
-      )}
-
       {/* Main Content */}
       <main style={{
         flex: 1,
-        paddingTop: activeTab === 'home' ? 0 : '4rem', // No padding for home
-        paddingBottom: '4rem', // Account for fixed bottom nav
+        paddingBottom: '5rem', // Account for fixed bottom nav
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch'
       }}>
@@ -224,72 +114,91 @@ const MobileApp = () => {
 
       {/* Bottom Navigation */}
       <nav style={{
-        backgroundColor: isDarkMode ? '#1e293b' : 'white',
-        borderTop: `1px solid ${isDarkMode ? '#334155' : '#e5e7eb'}`,
         position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #e5e7eb',
         display: 'flex',
         justifyContent: 'space-around',
-        alignItems: 'center',
         padding: '0.5rem 0',
-        zIndex: 1000,
-        boxShadow: '0 -2px 4px rgba(0,0,0,0.05)'
+        boxShadow: '0 -1px 3px 0 rgb(0 0 0 / 0.1)',
+        zIndex: 1000
       }}>
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.125rem',
-              padding: '0.375rem 0.25rem',
-              border: 'none',
-              background: 'none',
-              color: activeTab === tab.id ? '#0891b2' : '#6b7280',
-              fontSize: '0.625rem',
-              fontWeight: activeTab === tab.id ? '600' : '400',
-              transition: 'color 0.2s',
-              minWidth: 0,
-              maxWidth: `${100 / tabs.length}%` // Dynamic based on tab count
-            }}
-          >
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              <span style={{ fontSize: '1.25rem' }}>{tab.icon}</span>
-              {tab.id === 'messages' && unreadMessages > 0 && (
-                <span style={{
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '0.5rem',
+                cursor: 'pointer',
+                color: isActive ? '#0891b2' : '#6b7280',
+                textDecoration: 'none',
+                background: 'none',
+                border: 'none',
+                flex: 1,
+                minWidth: 0,
+                transition: 'color 0.2s',
+                position: 'relative'
+              }}
+            >
+              {/* Active indicator */}
+              {isActive && (
+                <div style={{
                   position: 'absolute',
-                  top: '-4px',
-                  right: '-8px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '18px',
-                  height: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.625rem',
-                  fontWeight: '600',
-                  border: '2px solid white'
-                }}>
-                  {unreadMessages > 99 ? '99+' : unreadMessages}
-                </span>
+                  top: 0,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '40px',
+                  height: '3px',
+                  backgroundColor: '#0891b2',
+                  borderRadius: '0 0 3px 3px'
+                }} />
               )}
-            </div>
-            <span style={{ 
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              {tab.label}
-            </span>
-          </button>
-        ))}
+              
+              <span style={{
+                fontSize: '1.5rem',
+                marginBottom: '0.25rem',
+                display: 'block',
+                position: 'relative'
+              }}>
+                {tab.icon}
+                {tab.id === 'messages' && unreadMessages > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-8px',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    borderRadius: '50%',
+                    minWidth: '18px',
+                    height: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.625rem',
+                    fontWeight: '600',
+                    padding: '0 4px'
+                  }}>
+                    {unreadMessages > 99 ? '99+' : unreadMessages}
+                  </span>
+                )}
+              </span>
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: isActive ? '600' : '400'
+              }}>
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
       </nav>
 
       {/* User Profile Modal */}

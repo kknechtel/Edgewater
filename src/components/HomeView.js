@@ -3,7 +3,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchWeatherData, fetchSurfReport } from '../services/weatherService';
 import { rsvpService } from '../services/rsvpService';
 import { eventService } from '../services/api';
-import '../styles/designSystem.css';
 
 const HomeView = ({ setActiveTab }) => {
   const { user } = useAuth();
@@ -12,7 +11,6 @@ const HomeView = ({ setActiveTab }) => {
   const [surfData, setSurfData] = useState(null);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [recentSightings, setRecentSightings] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -21,15 +19,17 @@ const HomeView = ({ setActiveTab }) => {
   }, []);
 
   const loadDashboardData = async () => {
-    setLoading(true);
     try {
-      // Load weather and surf data
-      const [weatherData, surfReport] = await Promise.all([
+      // Load weather and surf data in background - don't block UI
+      Promise.all([
         fetchWeatherData(),
         fetchSurfReport()
-      ]);
-      setWeather(weatherData);
-      setSurfData(surfReport);
+      ]).then(([weatherData, surfReport]) => {
+        setWeather(weatherData);
+        setSurfData(surfReport);
+      }).catch(error => {
+        console.error('Error loading weather data:', error);
+      });
 
       // Load events
       await loadUpcomingEvents();
@@ -42,8 +42,6 @@ const HomeView = ({ setActiveTab }) => {
       setRecentSightings(recentCount);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -72,19 +70,12 @@ const HomeView = ({ setActiveTab }) => {
     }
   };
 
-  const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
-
   const formatDate = (date) => {
     return date.toLocaleDateString('en-US', { 
       weekday: 'long',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     });
   };
 
@@ -123,118 +114,206 @@ const HomeView = ({ setActiveTab }) => {
     loadUpcomingEvents(); // Refresh events
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center" style={{ minHeight: '100vh' }}>
-        <div className="text-lg text-muted">Loading beach conditions...</div>
-      </div>
-    );
-  }
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      paddingBottom: '5rem',
+      backgroundColor: '#f9fafb'
+    },
+    header: {
+      backgroundColor: '#ffffff',
+      borderBottom: '1px solid #e5e7eb',
+      padding: '1.5rem',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+    },
+    headerTop: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '1rem'
+    },
+    logo: {
+      fontSize: '1.75rem',
+      fontWeight: '700',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      color: '#111827'
+    },
+    headerButtons: {
+      display: 'flex',
+      gap: '0.5rem'
+    },
+    btnIcon: {
+      backgroundColor: '#f3f4f6',
+      border: '1px solid #e5e7eb',
+      padding: '0.5rem',
+      borderRadius: '0.75rem',
+      fontSize: '1.25rem',
+      cursor: 'pointer',
+      minWidth: '44px',
+      minHeight: '44px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    btnPrimary: {
+      backgroundColor: '#0891b2',
+      color: 'white',
+      border: 'none',
+      padding: '0.5rem 1rem',
+      borderRadius: '0.75rem',
+      fontSize: '0.875rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+      minHeight: '44px'
+    },
+    welcomeText: {
+      fontSize: '1.125rem',
+      color: '#4b5563',
+      fontWeight: '500'
+    },
+    locationText: {
+      fontSize: '0.875rem',
+      color: '#6b7280',
+      marginTop: '0.25rem'
+    },
+    content: {
+      padding: '1rem'
+    },
+    card: {
+      backgroundColor: '#ffffff',
+      borderRadius: '0.75rem',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+      padding: '1.5rem',
+      marginBottom: '1rem'
+    },
+    cardTitle: {
+      fontSize: '1.25rem',
+      fontWeight: '600',
+      marginBottom: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      color: '#111827'
+    }
+  };
 
   return (
-    <div style={{ 
-      backgroundColor: 'var(--bg-secondary)', 
-      minHeight: '100vh',
-      paddingBottom: '5rem'
-    }}>
+    <div style={styles.container}>
       {/* Header */}
-      <div className="card" style={{ 
-        borderRadius: 0,
-        marginBottom: 0,
-        boxShadow: 'var(--shadow)',
-        padding: 'var(--space-6)'
-      }}>
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <span style={{ fontSize: 'var(--text-3xl)' }}>🌊</span>
-            <h1 className="text-2xl font-bold text-primary">Clubbers</h1>
+      <div style={styles.header}>
+        <div style={styles.headerTop}>
+          <div style={styles.logo}>
+            <span>🌊</span>
+            Clubbers
           </div>
-          <button 
-            className="btn-icon"
-            onClick={() => setActiveTab('profile')}
-            style={{ fontSize: 'var(--text-xl)' }}
-          >
-            ⚙️
-          </button>
+          <div style={styles.headerButtons}>
+            <button 
+              style={styles.btnIcon}
+              onClick={() => setActiveTab('profile')}
+            >
+              ⚙️
+            </button>
+          </div>
         </div>
-        
         <div>
-          <p className="text-lg font-medium text-secondary">
+          <p style={styles.welcomeText}>
             Welcome back, {user?.display_name || user?.first_name || 'Beach Lover'}!
           </p>
-          <p className="text-sm text-muted">
+          <p style={styles.locationText}>
             {formatDate(currentTime)} • 📍 Sea Bright, NJ
           </p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ padding: 'var(--space-4)' }}>
-        {/* Weather & Surf Card */}
-        <div className="card">
-          <h2 className="card-title">
+      <div style={styles.content}>
+        {/* Weather Card */}
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>
             <span>☀️</span> Weather & Surf
           </h2>
           
-          <div style={{ 
-            display: 'grid', 
+          <div style={{
+            display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gap: 'var(--space-4)',
-            marginBottom: 'var(--space-5)'
+            gap: '1rem',
+            marginBottom: '1.25rem'
           }}>
             <div style={{
-              backgroundColor: 'var(--primary-pale)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-4)',
+              backgroundColor: '#ecfeff',
+              borderRadius: '0.75rem',
+              padding: '1rem',
               border: '1px solid rgba(8, 145, 178, 0.2)'
             }}>
-              <div className="text-3xl font-bold text-primary-blue">
+              <div style={{
+                fontSize: '2.5rem',
+                fontWeight: '700',
+                color: '#0891b2'
+              }}>
                 {weather?.temp || '--'}°
               </div>
-              <div className="text-base text-secondary">
+              <div style={{
+                fontSize: '1rem',
+                color: '#4b5563'
+              }}>
                 {weather?.condition || 'Loading...'}
               </div>
-              <div className="text-sm text-muted" style={{ marginTop: 'var(--space-1)' }}>
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                marginTop: '0.25rem'
+              }}>
                 Feels like {weather?.feelsLike || '--'}°
               </div>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
               <div style={{
-                backgroundColor: 'var(--gray-100)',
-                borderRadius: 'var(--radius)',
-                padding: 'var(--space-2) var(--space-3)',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 0.75rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 'var(--space-2)'
+                gap: '0.5rem',
+                fontSize: '0.875rem',
+                color: '#4b5563'
               }}>
                 <span>💨</span>
-                <span className="text-sm">{weather?.wind || 'Loading...'}</span>
+                <span>{weather?.wind || 'Loading...'}</span>
               </div>
               <div style={{
-                backgroundColor: 'var(--gray-100)',
-                borderRadius: 'var(--radius)',
-                padding: 'var(--space-2) var(--space-3)',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 0.75rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 'var(--space-2)'
+                gap: '0.5rem',
+                fontSize: '0.875rem',
+                color: '#4b5563'
               }}>
                 <span>💧</span>
-                <span className="text-sm">{weather?.humidity || '--'}% humidity</span>
+                <span>{weather?.humidity || '--'}% humidity</span>
               </div>
               {weather?.uvIndex >= 7 && (
                 <div style={{
                   backgroundColor: '#fef3c7',
-                  color: 'var(--warning)',
-                  borderRadius: 'var(--radius)',
-                  padding: 'var(--space-2) var(--space-3)',
+                  color: '#f59e0b',
+                  fontWeight: '600',
+                  borderRadius: '0.5rem',
+                  padding: '0.5rem 0.75rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 'var(--space-2)',
-                  fontWeight: 'var(--font-semibold)'
+                  gap: '0.5rem',
+                  fontSize: '0.875rem'
                 }}>
                   <span>☀️</span>
-                  <span className="text-sm">UV Index: {weather.uvIndex}</span>
+                  <span>UV Index: {weather.uvIndex}</span>
                 </div>
               )}
             </div>
@@ -242,51 +321,59 @@ const HomeView = ({ setActiveTab }) => {
 
           {/* Surf Report */}
           <div style={{
-            backgroundColor: 'var(--gray-100)',
-            borderRadius: 'var(--radius-md)',
-            padding: 'var(--space-4)',
-            border: '1px solid var(--gray-200)'
+            backgroundColor: '#f3f4f6',
+            borderRadius: '0.75rem',
+            padding: '1rem',
+            border: '1px solid #e5e7eb'
           }}>
-            <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              marginBottom: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              color: '#111827'
+            }}>
               <span>🏄</span> Surf Conditions
             </h3>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: 'var(--space-3)'
+              gap: '0.75rem'
             }}>
               <div>
-                <div className="text-xs text-muted">Waves</div>
-                <div className="text-base font-semibold text-primary-blue">
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Waves</div>
+                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#0891b2' }}>
                   {surfData?.waveHeight || 'Loading...'}
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted">Quality</div>
-                <div className="text-base font-semibold text-success">
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Quality</div>
+                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#10b981' }}>
                   {surfData?.quality || 'Loading...'}
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted">Water Temp</div>
-                <div className="text-base font-semibold">
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Water Temp</div>
+                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
                   {surfData?.waterTemp || '--'}°F
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted">Crowd</div>
-                <div className="text-base font-semibold">
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Crowd</div>
+                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
                   {surfData?.crowd || 'Loading...'}
                 </div>
               </div>
             </div>
             <div style={{
-              marginTop: 'var(--space-3)',
-              padding: 'var(--space-2)',
-              backgroundColor: 'var(--white)',
-              borderRadius: 'var(--radius)',
-              fontSize: 'var(--text-sm)',
-              color: 'var(--text-secondary)',
+              marginTop: '0.75rem',
+              padding: '0.5rem',
+              backgroundColor: '#ffffff',
+              borderRadius: '0.5rem',
+              fontSize: '0.875rem',
+              color: '#4b5563',
               textAlign: 'center'
             }}>
               {surfData?.tide || 'Tide info loading...'}
@@ -295,43 +382,70 @@ const HomeView = ({ setActiveTab }) => {
         </div>
 
         {/* Events Section */}
-        <div className="card">
-          <h2 className="card-title">
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>
             <span>📅</span> Upcoming Events
           </h2>
           
           {upcomingEvents.length === 0 ? (
-            <p className="text-muted">No upcoming events scheduled</p>
+            <p style={{ color: '#6b7280' }}>No upcoming events scheduled</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <div>
               {upcomingEvents.map(event => (
                 <div key={event.id} style={{
-                  backgroundColor: 'var(--gray-100)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: 'var(--space-4)',
-                  border: '1px solid var(--gray-200)',
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '0.75rem',
+                  padding: '1rem',
+                  border: '1px solid #e5e7eb',
+                  marginBottom: '1rem',
                   cursor: 'pointer',
-                  transition: 'all var(--transition)'
+                  transition: 'all 0.2s'
                 }}
-                onClick={() => setActiveTab('calendar')}
-                className="hover:shadow-md">
-                  <div className="flex justify-between items-start">
+                onClick={() => setActiveTab('calendar')}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'start'
+                  }}>
                     <div style={{ flex: 1 }}>
-                      <h3 className="text-lg font-semibold mb-1">{event.title}</h3>
-                      <p className="text-sm text-secondary">
+                      <h3 style={{
+                        fontSize: '1.125rem',
+                        fontWeight: '600',
+                        marginBottom: '0.25rem',
+                        color: '#111827'
+                      }}>
+                        {event.title}
+                      </h3>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#4b5563'
+                      }}>
                         {getEventDateLabel(event.event_date)} • {event.event_time || 'Time TBD'}
                       </p>
-                      <p className="text-sm text-muted mt-1">
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        marginTop: '0.25rem'
+                      }}>
                         👥 {event.attendeeCount || 0} attending
                       </p>
                     </div>
                     <button
-                      className={`btn ${event.userRsvp ? 'btn-success' : 'btn-primary'}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleRsvp(event.id);
                       }}
-                      style={{ minWidth: '80px' }}
+                      style={{
+                        backgroundColor: event.userRsvp ? '#10b981' : '#0891b2',
+                        color: 'white',
+                        border: 'none',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.75rem',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        minHeight: '44px'
+                      }}
                     >
                       {event.userRsvp ? '✓ Going' : 'RSVP'}
                     </button>
@@ -346,14 +460,18 @@ const HomeView = ({ setActiveTab }) => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 'var(--space-3)'
+          gap: '0.75rem'
         }}>
           <div 
-            className="card"
-            style={{ 
-              padding: 'var(--space-4)',
-              textAlign: 'center',
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              padding: '1rem',
               cursor: 'pointer',
+              textAlign: 'center',
+              boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+              transition: 'all 0.2s',
               minHeight: '100px',
               display: 'flex',
               flexDirection: 'column',
@@ -362,19 +480,25 @@ const HomeView = ({ setActiveTab }) => {
             }}
             onClick={() => setActiveTab('sasqwatch')}
           >
-            <div style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>👣</div>
-            <div className="text-xs text-muted">Sightings</div>
-            <div className="text-sm font-semibold text-success">
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>👣</div>
+            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.125rem' }}>
+              Sightings
+            </p>
+            <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#10b981' }}>
               {recentSightings} this week
-            </div>
+            </p>
           </div>
           
           <div 
-            className="card"
-            style={{ 
-              padding: 'var(--space-4)',
-              textAlign: 'center',
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              padding: '1rem',
               cursor: 'pointer',
+              textAlign: 'center',
+              boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+              transition: 'all 0.2s',
               minHeight: '100px',
               display: 'flex',
               flexDirection: 'column',
@@ -383,32 +507,40 @@ const HomeView = ({ setActiveTab }) => {
             }}
             onClick={() => setActiveTab('bags')}
           >
-            <div style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>🎯</div>
-            <div className="text-xs text-muted">Bags</div>
-            <div className="text-sm font-semibold text-warning">
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎯</div>
+            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.125rem' }}>
+              Bags
+            </p>
+            <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#f59e0b' }}>
               Quick Game
-            </div>
+            </p>
           </div>
           
           <div 
-            className="card"
-            style={{ 
-              padding: 'var(--space-4)',
-              textAlign: 'center',
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              padding: '1rem',
               cursor: 'pointer',
+              textAlign: 'center',
+              boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+              transition: 'all 0.2s',
               minHeight: '100px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            onClick={() => setActiveTab('music')}
+            onClick={() => setActiveTab('more')}
           >
-            <div style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>🎸</div>
-            <div className="text-xs text-muted">Live Music</div>
-            <div className="text-sm font-semibold" style={{ color: 'var(--purple)' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎸</div>
+            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.125rem' }}>
+              Live Music
+            </p>
+            <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#8b5cf6' }}>
               Band Guide
-            </div>
+            </p>
           </div>
         </div>
       </div>

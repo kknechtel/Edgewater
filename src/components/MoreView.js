@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import '../styles/designSystem.css';
 
 const MoreView = ({ setActiveTab }) => {
   const { user } = useAuth();
@@ -12,7 +11,8 @@ const MoreView = ({ setActiveTab }) => {
     { id: 'bags', label: 'Bags', icon: '🎯', tab: 'bags' },
     { id: 'weather', label: 'Weather', icon: '🌊', tab: 'weather' },
     { id: 'dinner', label: 'Dinner', icon: '🍽️', tab: 'dinner' },
-    { id: 'profile', label: 'Profile Settings', icon: '👤', tab: 'profile' }
+    { id: 'profile', label: 'Profile Settings', icon: '👤', tab: 'profile' },
+    ...(user?.is_admin ? [{ id: 'admin', label: 'Admin Dashboard', icon: '👑', tab: 'admin' }] : [])
   ];
 
   const comingSoonFeatures = [

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import '../styles/designSystem.css';
 
 const BagsView = () => {
   const { user } = useAuth();
