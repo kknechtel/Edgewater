@@ -1,110 +1,66 @@
-# Edgewater Community App
+# Edgewater Beach Club
 
-A full-stack web application for managing community events and activities, built with Flask (backend) and React (frontend).
-
-## Project Structure
-
-```
-Edgewater-1/
-├── edgewater-backend/     # Flask backend API
-│   ├── app/              # Flask application package
-│   ├── migrations/       # Database migrations
-│   ├── requirements.txt  # Python dependencies
-│   ├── config.py        # Configuration
-│   └── run.py           # Application entry point
-├── edgewater-frontend/   # React frontend
-│   ├── src/             # React source code
-│   ├── public/          # Static assets
-│   ├── package.json     # Node.js dependencies
-│   └── README.md        # Frontend documentation
-└── README.md            # This file
-```
-
-## Quick Start
-
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd edgewater-backend
-   ```
-
-2. Create and activate virtual environment:
-   ```bash
-   python -m venv venv
-   .\venv\Scripts\activate  # Windows
-   source venv/bin/activate # macOS/Linux
-   ```
-
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Set up environment:
-   ```bash
-   cp env.template .env
-   # Edit .env with your configuration
-   ```
-
-5. Initialize database:
-   ```bash
-   flask db init
-   flask db migrate -m "Initial migration"
-   flask db upgrade
-   ```
-
-6. Run the backend:
-   ```bash
-   flask run
-   ```
-
-The backend will be available at `http://127.0.0.1:5000`
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd edgewater-frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create environment file:
-   ```bash
-   cp .env.template .env
-   # Update REACT_APP_API_URL if needed
-   ```
-
-4. Start the development server:
-   ```bash
-   npm start
-   ```
-
-The frontend will be available at `http://localhost:3000`
+A comprehensive community management platform for beach club members featuring event management, bags (cornhole) game tracking, and admin tools.
 
 ## Features
 
-- **User Authentication**: Register, login, and session management
-- **Event Management**: Create, read, update, and delete community events
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Modular Architecture**: Separate backend and frontend for easy maintenance
+- 📅 **Event Calendar** - Create and manage community events
+- 🎯 **Bags Game System** - Track games, tournaments, and leaderboards
+- 👥 **User Management** - Admin dashboard with role-based access
+- 🔐 **Authentication** - Email/password and Google OAuth support
+- 📊 **Statistics** - Player stats, rankings, and tournament history
+
+## Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Node.js 14+
+- Redis (optional, for waitlist feature)
+
+### Backend Setup
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Create .env file
+cp .env.example .env
+# Edit .env with your configuration
+
+# Initialize database
+python3 -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
+
+# Run Flask server
+python3 run.py
+```
+
+### Frontend Setup
+```bash
+# Install Node dependencies
+npm install
+
+# Run React development server
+npm start
+```
+
+### Access the Application
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000/api
+
+## Configuration
+
+Create a `.env` file with:
+```
+SECRET_KEY=your-secret-key
+JWT_SECRET_KEY=your-jwt-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+ADMIN_EMAILS=admin@example.com
+```
 
 ## Development
 
-- Backend: Flask with SQLAlchemy, Flask-Migrate, and JWT authentication
-- Frontend: React with React Router, Axios, and Tailwind CSS
-- Database: SQLite (development) / PostgreSQL (production ready)
+See [CLAUDE.md](CLAUDE.md) for detailed development documentation.
 
-## API Endpoints
+## License
 
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-- `GET /auth/me` - Get current user
-- `GET /events` - List all events
-- `POST /events` - Create new event
-- `PUT /events/:id` - Update event
-- `DELETE /events/:id` - Delete event
+This project is proprietary and confidential.
