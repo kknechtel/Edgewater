@@ -48,6 +48,28 @@ flask db upgrade
 Backend runs on `http://localhost:5000` by default.
 Frontend runs on `http://localhost:3000` by default.
 
+### Running Tests
+```bash
+# Frontend - uses Jest via Create React App
+cd Edgewater-1/edgewater-frontend
+npm test
+
+# Backend - No test framework configured yet
+# Manual API testing available via frontend Test.js component
+```
+
+### Development Workflow
+```bash
+# Backend: Run from Edgewater-1/edgewater-backend/
+python run.py  # Development server with debug mode
+
+# Frontend: Run from Edgewater-1/edgewater-frontend/
+npm start      # Development server with hot reload
+npm run build  # Production build
+
+# Both servers needed for full functionality
+```
+
 ## Architecture Overview
 
 ### Backend (Flask - Edgewater-1/edgewater-backend/)
@@ -141,3 +163,45 @@ This is a fun community app for Edgewater Beach Club members featuring:
 - **Bag Tracking**: 🚧 Lost & found for beach gear
 - **Music Guide**: 🚧 Band ratings and vibes for events
 - **Dinner**: 🚧 Restaurant features
+
+## Key Dependencies & Tech Stack
+
+### Backend Dependencies
+- Flask 2.3.2 - Web framework
+- SQLAlchemy & Flask-SQLAlchemy - ORM and database management
+- Flask-Migrate - Database migrations (Alembic)
+- Flask-JWT-Extended - JWT authentication
+- Flask-CORS - Cross-origin request handling
+- python-dotenv - Environment variable management
+- boto3 - AWS S3 integration for photo uploads
+- cryptography - Password hashing
+
+### Frontend Dependencies
+- React 18 - UI framework
+- React Router v6 - Routing and navigation
+- Axios - HTTP client
+- Tailwind CSS - Styling framework
+- Lucide React - Icon library
+- @react-oauth/google - Google OAuth integration
+
+### Database Schema Notes
+- User model includes Google OAuth fields (google_id, google_picture_url)
+- Event model has relationships for attendees and band_rating/band_vibe fields
+- SasquatchSighting model includes credibility_rating and photo_url
+- All models use UUID primary keys for better distributed system compatibility
+- Proper foreign key relationships and cascade delete configured
+
+### API Pattern
+All backend routes follow RESTful conventions with `/api/` prefix:
+- GET /api/resource - List all
+- GET /api/resource/:id - Get single
+- POST /api/resource - Create new
+- PUT /api/resource/:id - Update existing
+- DELETE /api/resource/:id - Delete
+
+### Authentication Flow
+1. Frontend stores JWT token in localStorage
+2. API service automatically includes token in Authorization header
+3. Backend validates token on protected routes using @jwt_required decorator
+4. Token expiration: 30 days
+5. Google OAuth creates/updates user account and returns JWT token
