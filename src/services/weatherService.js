@@ -1,11 +1,11 @@
 // Weather service using FREE Open-Meteo API - No API key required!
 // Combines weather and marine data for comprehensive beach conditions
 
-// Default beach location - Sea Bright, NJ
+// Default beach location - Seabright, CA
 const BEACH_LOCATION = {
-  lat: 40.3615, // Sea Bright, NJ
-  lon: -73.9743,
-  name: 'Sea Bright Beach'
+  lat: 36.9647, // Seabright, CA
+  lon: -122.0102,
+  name: 'Seabright Beach'
 };
 
 // Weather code to condition mapping
@@ -48,10 +48,14 @@ const weatherCodeToIcon = {
   95: '⛈️', 96: '⛈️', 99: '⛈️'
 };
 
-export const fetchWeatherData = async () => {
+export const fetchWeatherData = async (coordinates = null) => {
   try {
+    // Use provided coordinates or default location
+    const location = coordinates || BEACH_LOCATION;
+    const timezone = coordinates?.timezone || 'America/Los_Angeles';
+    
     // Fetch current weather and forecast from Open-Meteo (FREE, no API key needed!)
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${BEACH_LOCATION.lat}&longitude=${BEACH_LOCATION.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,uv_index&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America/New_York`;
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,uv_index&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=${timezone}`;
     
     const response = await fetch(weatherUrl);
     if (!response.ok) throw new Error('Weather API failed');
@@ -68,7 +72,11 @@ export const fetchWeatherData = async () => {
       const time = new Date(data.hourly.time[i]);
       const hour = time.getHours();
       hourly.push({
-        time: time.toLocaleTimeString('en-US', { hour: 'numeric' }),
+        time: time.toLocaleTimeString('en-US', { 
+          hour: 'numeric',
+          hour12: true,
+          timeZone: timezone // Use the proper timezone
+        }),
         temp: Math.round(data.hourly.temperature_2m[i]),
         condition: weatherCodeToCondition[data.hourly.weather_code[i]] || 'Unknown',
         icon: hour >= 6 && hour <= 20 ? 

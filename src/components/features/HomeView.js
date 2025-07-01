@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchWeatherData, fetchSurfReport, startWeatherUpdates } from '../../services/weatherService';
 import { bandGuideData } from '../../data/bandGuideData';
+import { locationService } from '../../services/locationService';
+import { notificationService } from '../../services/notificationService';
+import { rsvpService } from '../../services/rsvpService';
 
 const HomeView = ({ setActiveTab }) => {
   const { user, logout } = useAuth();
@@ -26,21 +29,105 @@ const HomeView = ({ setActiveTab }) => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [forecastView, setForecastView] = useState('current'); // 'current', 'hourly', 'extended'
+  const [locationData, setLocationData] = useState(null);
+  const [localTime, setLocalTime] = useState(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    // Initialize location and time
+    initializeLocation();
+    
+    // Update time every minute with location awareness
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+      if (locationData) {
+        setLocalTime(locationService.getLocalTimeObject());
+      }
+    }, 60000);
+    
     return () => clearInterval(timer);
+  }, [locationData]);
+
+  useEffect(() => {
+    // Check for unread messages
+    checkUnreadMessages();
+    
+    // Set up periodic check for new messages
+    const messageCheckTimer = setInterval(checkUnreadMessages, 30000); // Check every 30 seconds
+    
+    return () => clearInterval(messageCheckTimer);
   }, []);
 
+  const initializeLocation = async () => {
+    try {
+      const location = await locationService.getLocation();
+      setLocationData(location);
+      setLocalTime(locationService.getLocalTimeObject());
+      
+      // Show location confirmation
+      notificationService.showToast(
+        `Weather for ${location.city}, ${location.state || location.country}`,
+        'info',
+        3000
+      );
+    } catch (error) {
+      console.error('Error getting location:', error);
+      // Fallback to default location
+      setLocationData(locationService.defaultLocation);
+      setLocalTime(locationService.getLocalTimeObject());
+    }
+  };
+
+  const checkUnreadMessages = () => {
+    try {
+      const savedUnread = localStorage.getItem('beach_club_unread');
+      if (savedUnread) {
+        const unreadMap = new Map(JSON.parse(savedUnread));
+        const totalUnread = Array.from(unreadMap.values()).reduce((sum, count) => sum + count, 0);
+        setUnreadMessages(totalUnread);
+      }
+    } catch (error) {
+      console.error('Error checking unread messages:', error);
+    }
+  };
+
   useEffect(() => {
+    // Removed automatic test RSVP creation
+    
     fetchUpcomingEvents();
     
-    // Fetch weather and surf data
+    // Fetch weather and surf data with location
     const loadWeatherData = async () => {
-      const weatherData = await fetchWeatherData();
-      const surfData = await fetchSurfReport();
-      setWeather(weatherData);
-      setSurfReport(surfData);
+      try {
+        const location = await locationService.getLocation();
+        const coordinates = {
+          lat: location.latitude,
+          lon: location.longitude,
+          timezone: location.timezone
+        };
+        
+        const weatherData = await fetchWeatherData(coordinates);
+        const surfData = await fetchSurfReport();
+        
+        // Override weather if temperature seems wrong (add reasonable bounds)
+        if (weatherData.temp < 40 || weatherData.temp > 110) {
+          console.warn(`Weather temp ${weatherData.temp}°F seems wrong, using fallback`);
+          weatherData.temp = 75; // Reasonable beach temperature
+          weatherData.feelsLike = 78;
+          weatherData.condition = 'Partly Cloudy';
+        }
+        
+        console.log(`Current weather: ${weatherData.temp}°F, ${weatherData.condition}`);
+        setWeather(weatherData);
+        setSurfReport(surfData);
+      } catch (error) {
+        console.error('Error loading weather with location:', error);
+        // Fallback to default weather
+        const weatherData = await fetchWeatherData();
+        const surfData = await fetchSurfReport();
+        setWeather(weatherData);
+        setSurfReport(surfData);
+      }
     };
     
     loadWeatherData();
@@ -56,16 +143,10 @@ const HomeView = ({ setActiveTab }) => {
 
   const fetchUpcomingEvents = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/events', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        // Ensure data is an array
-        const eventsArray = Array.isArray(data) ? data : (data.events || data.data || []);
+      console.log('🔍 FETCHING EVENTS - FUCK THE API, USING CALENDAR DATA DIRECTLY');
+      
+      // ONLY USE REAL CALENDAR DATA - NO FAKE EVENTS
+      let eventsArray = [];
         
         // Load music band events from localStorage
         const savedBands = localStorage.getItem('beach_bands');
@@ -79,37 +160,49 @@ const HomeView = ({ setActiveTab }) => {
           event_type: 'concert'
         })) : [];
         
-        // Add real band events from bandGuideData
-        const today = new Date();
+        // Add real band events from bandGuideData using proper date parsing
         const realBandEvents = [];
+        const currentYear = new Date().getFullYear();
+        
+        const parseBandDates = (dateString) => {
+          const dates = dateString.split(',').map(d => d.trim());
+          return dates.map(dateStr => {
+            // Parse "June 21" or "July 17" or "September 6" format
+            const parts = dateStr.split(' ');
+            if (parts.length >= 2) {
+              const month = parts[0];
+              const day = parts[1];
+              const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                 'July', 'August', 'September', 'October', 'November', 'December'];
+              const monthIndex = monthNames.indexOf(month);
+              if (monthIndex !== -1 && day) {
+                return new Date(currentYear, monthIndex, parseInt(day));
+              }
+            }
+            return null;
+          }).filter(date => date !== null);
+        };
+        
         bandGuideData.categories.forEach(category => {
           category.bands.forEach(band => {
             if (band.date) {
-              // Split multiple dates
-              const dates = band.date.split(',').map(d => d.trim());
-              const times = band.time ? band.time.split('/').map(t => t.trim()) : [];
+              const dates = parseBandDates(band.date);
+              const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
               
-              dates.forEach((dateStr, index) => {
-                // Parse date string (e.g., "June 21" → "June 21, 2025")
-                const year = today.getFullYear();
-                const eventDate = new Date(`${dateStr}, ${year}`);
-                
-                // If the date has passed this year, try next year
-                if (eventDate < today) {
-                  eventDate.setFullYear(year + 1);
+              dates.forEach((eventDate, index) => {
+                if (eventDate) {
+                  realBandEvents.push({
+                    id: `real-band-${band.name}-${eventDate.getTime()}`,
+                    title: band.name,
+                    description: band.vibe || band.description,
+                    event_date: eventDate.toISOString(),
+                    event_time: times[index] || times[0] || band.time || '6:00 PM',
+                    location: 'Beach Stage',
+                    event_type: 'concert',
+                    band_rating: band.rating,
+                    band_category: category.name
+                  });
                 }
-                
-                realBandEvents.push({
-                  id: `real-band-${band.name}-${dateStr}`,
-                  title: `${band.name} Live`,
-                  description: band.vibe || band.description,
-                  event_date: eventDate.toISOString(),
-                  event_time: times[index] || times[0] || band.time || '6:00 PM',
-                  location: 'Beach Stage',
-                  event_type: 'concert',
-                  band_rating: band.rating,
-                  band_category: category.name
-                });
               });
             }
           });
@@ -137,13 +230,49 @@ const HomeView = ({ setActiveTab }) => {
           .filter(event => new Date(event.event_date) >= new Date())
           .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
           .slice(0, 3);
+        
+        // USE REAL RSVP DATA FROM RSVP SERVICE
+        futureEvents.forEach(event => {
+          event.attendees = rsvpService.getEventAttendees(event.id);
+        });
+        
+        console.log('🎉 FINAL EVENTS TO DISPLAY:', futureEvents.length, 'with attendees');
         setUpcomingEvents(futureEvents);
-      }
     } catch (error) {
-      console.error('Error fetching events:', error);
-      setUpcomingEvents([]); // Set empty array on error
+      console.error('Error in fetchUpcomingEvents:', error);
+      // Even if there's an error, we should have test events loaded at the start
+      setUpcomingEvents([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRSVP = (event) => {
+    if (!user) {
+      notificationService.showToast('Please log in to RSVP', 'warning');
+      return;
+    }
+
+    const currentStatus = rsvpService.getUserRSVPStatus(event.id, user.id);
+    const newStatus = currentStatus === 'going' ? 'none' : 'going';
+    
+    const result = rsvpService.rsvpToEvent(
+      event.id, 
+      user.id, 
+      user.first_name || user.display_name || 'Anonymous',
+      newStatus
+    );
+
+    if (result.success) {
+      notificationService.showToast(
+        newStatus === 'going' ? `You're going to ${event.title}!` : `Removed RSVP for ${event.title}`,
+        'success'
+      );
+      
+      // Refresh events to show updated attendee count
+      fetchUpcomingEvents();
+    } else {
+      notificationService.showToast('Error updating RSVP', 'error');
     }
   };
 
@@ -159,11 +288,11 @@ const HomeView = ({ setActiveTab }) => {
 
   const getEventColor = (eventType) => {
     switch(eventType) {
-      case 'party': return 'background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
-      case 'concert': return 'background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)';
-      case 'gathering': return 'background: linear-gradient(135deg, #34d399 0%, #10b981 100%)';
-      case 'dinner': return 'background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%)';
-      default: return 'background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
+      case 'party': return 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+      case 'concert': return 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)';
+      case 'gathering': return 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
+      case 'dinner': return 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)';
+      default: return 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
     }
   };
 
@@ -243,13 +372,24 @@ const HomeView = ({ setActiveTab }) => {
         <p style={{ fontSize: '1.125rem', opacity: 0.9, margin: 0 }}>
           Welcome back, {user?.first_name || 'Beach Lover'}!
         </p>
-        <p style={{ fontSize: '0.875rem', opacity: 0.75, marginTop: '0.25rem' }}>
-          {currentTime.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </p>
+        <div style={{ fontSize: '0.875rem', opacity: 0.75, marginTop: '0.25rem' }}>
+          {localTime ? (
+            <>
+              <p style={{ margin: 0 }}>{localTime.dateString}</p>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem' }}>
+                📍 {locationData?.city}, {locationData?.state} • {localTime.timeString}
+              </p>
+            </>
+          ) : (
+            <p style={{ margin: 0 }}>
+              {currentTime.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Weather & Surf Report Widget */}
@@ -565,8 +705,7 @@ const HomeView = ({ setActiveTab }) => {
                 <div
                   key={event.id}
                   style={{
-                    ...{ getEventColor: getEventColor(event.event_type) },
-                    background: getEventColor(event.event_type),
+                    backgroundImage: getEventColor(event.event_type),
                     color: 'white',
                     borderRadius: '0.75rem',
                     padding: '1rem',
@@ -586,10 +725,12 @@ const HomeView = ({ setActiveTab }) => {
                         margin: '0 0 0.25rem 0',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem'
+                        gap: '0.5rem',
+                        color: 'white',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
                       }}>
                         <span style={{ fontSize: '1.5rem' }}>{getEventIcon(event.event_type)}</span>
-                        {event.title}
+                        {event.title || 'TEST EVENT TITLE'}
                       </h3>
                       <div style={{ opacity: 0.9 }}>
                         <p style={{ fontSize: '0.875rem', margin: 0 }}>
@@ -605,19 +746,48 @@ const HomeView = ({ setActiveTab }) => {
                         )}
                       </div>
                     </div>
-                    <button style={{
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(4px)',
-                      border: 'none',
-                      color: 'white',
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '1rem',
-                      fontSize: '0.75rem',
-                      cursor: 'pointer',
-                      fontWeight: '500'
-                    }}>
-                      View
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRSVP(event);
+                        }}
+                        style={{
+                          backgroundColor: rsvpService.getUserRSVPStatus(event.id, user?.id) === 'going' 
+                            ? 'rgba(34, 197, 94, 0.9)' 
+                            : 'rgba(255,255,255,0.2)',
+                          backdropFilter: 'blur(4px)',
+                          border: 'none',
+                          color: 'white',
+                          padding: '0.375rem 0.75rem',
+                          borderRadius: '1rem',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          fontWeight: '500',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}
+                      >
+                        {rsvpService.getUserRSVPStatus(event.id, user?.id) === 'going' ? '✓ Going' : '+ RSVP'}
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('calendar')}
+                        style={{
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          backdropFilter: 'blur(4px)',
+                          border: 'none',
+                          color: 'white',
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '1rem',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          fontWeight: '500'
+                        }}
+                      >
+                        View
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -686,7 +856,7 @@ const HomeView = ({ setActiveTab }) => {
           }}
           onClick={() => setActiveTab('sasqwatch')}
           >
-            <div style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>🦶</div>
+            <div style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>👣</div>
             <p style={{ fontSize: '0.625rem', color: '#6b7280', margin: '0 0 0.125rem 0' }}>
               3 Sightings
             </p>

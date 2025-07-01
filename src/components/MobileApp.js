@@ -1,27 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { notificationService } from '../services/notificationService';
 import EnhancedCalendarView from './EnhancedCalendarView';
 import SasqWatch from './features/SasqWatch';
 import Photos from './features/Photos';
 import Messages from './features/Messages';
-import BagsView from './views/BagsView';
+import BagsView from './BagsView';
 import HomeView from './features/HomeView';
+import UserProfile from './UserProfile';
 
 const MobileApp = () => {
   const { logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    // Initialize notifications
+    notificationService.init();
+    
+    // Check for unread messages
+    checkUnreadMessages();
+    
+    // Set up periodic check for new messages
+    const messageCheckTimer = setInterval(checkUnreadMessages, 30000); // Check every 30 seconds
+    
+    return () => clearInterval(messageCheckTimer);
+  }, []);
+
+  const checkUnreadMessages = () => {
+    try {
+      const savedUnread = localStorage.getItem('beach_club_unread');
+      if (savedUnread) {
+        const unreadMap = new Map(JSON.parse(savedUnread));
+        const totalUnread = Array.from(unreadMap.values()).reduce((sum, count) => sum + count, 0);
+        setUnreadMessages(totalUnread);
+      }
+    } catch (error) {
+      console.error('Error checking unread messages:', error);
+    }
+  };
+
   const tabs = [
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'calendar', label: 'Events', icon: '🏖️' },
-    { id: 'bags', label: 'Cornhole', icon: '🎯' },
-    { id: 'sasqwatch', label: 'SasqWatch', icon: '🦶' },
+    { id: 'bags', label: 'Bags', icon: '🎯' },
+    { id: 'sasqwatch', label: 'SasqWatch', icon: '👣' },
     { id: 'messages', label: 'Chat', icon: '💭' },
   ];
 
@@ -79,21 +109,38 @@ const MobileApp = () => {
           }}>
             🏖️ Clubbers
           </h1>
-          <button
-            onClick={logout}
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-          >
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => setShowProfile(true)}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              👤 Profile
+            </button>
+            <button
+              onClick={logout}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </header>
       )}
 
@@ -144,7 +191,29 @@ const MobileApp = () => {
               maxWidth: '20%' // For 5 tabs
             }}
           >
-            <span style={{ fontSize: '1.25rem' }}>{tab.icon}</span>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <span style={{ fontSize: '1.25rem' }}>{tab.icon}</span>
+              {tab.id === 'messages' && unreadMessages > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-8px',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '18px',
+                  height: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.625rem',
+                  fontWeight: '600',
+                  border: '2px solid white'
+                }}>
+                  {unreadMessages > 99 ? '99+' : unreadMessages}
+                </span>
+              )}
+            </div>
             <span style={{ 
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -155,6 +224,11 @@ const MobileApp = () => {
           </button>
         ))}
       </nav>
+
+      {/* User Profile Modal */}
+      {showProfile && (
+        <UserProfile onClose={() => setShowProfile(false)} />
+      )}
     </div>
   );
 };

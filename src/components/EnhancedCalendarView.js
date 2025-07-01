@@ -36,13 +36,18 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
     const currentYear = new Date().getFullYear();
     const dates = dateString.split(',').map(d => d.trim());
     return dates.map(dateStr => {
-      // Parse "June 21" or "July 17" format
-      const [month, day] = dateStr.split(' ');
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                         'July', 'August', 'September', 'October', 'November', 'December'];
-      const monthIndex = monthNames.indexOf(month);
-      if (monthIndex !== -1 && day) {
-        return new Date(currentYear, monthIndex, parseInt(day));
+      // Parse "June 21" or "July 17" or "September 6" format
+      const parts = dateStr.split(' ');
+      if (parts.length >= 2) {
+        const month = parts[0];
+        const day = parts[1];
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const monthIndex = monthNames.indexOf(month);
+        if (monthIndex !== -1 && day) {
+          const parsedDate = new Date(currentYear, monthIndex, parseInt(day));
+          return parsedDate;
+        }
       }
       return null;
     }).filter(date => date !== null);
@@ -52,8 +57,15 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
     try {
       setLoading(true);
       
-      // Load events from backend API
-      const apiEvents = await eventService.getAllEvents();
+      // Load events from backend API  
+      let apiEvents = [];
+      try {
+        const response = await eventService.getAllEvents();
+        apiEvents = Array.isArray(response) ? response : (response.events || response.data || []);
+      } catch (error) {
+        console.log('API events failed, using empty array:', error);
+        apiEvents = [];
+      }
       
       // Load band events from bandGuideData
       const bandEvents = [];
@@ -64,19 +76,22 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
             const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
             
             dates.forEach((date, index) => {
-              bandEvents.push({
-                id: `band-${band.name}-${date.getTime()}`,
-                title: band.name,
-                description: band.description,
-                event_date: date.toISOString().split('T')[0],
-                event_time: times[index] || times[0],
-                location: 'Beach Stage',
-                event_type: 'concert',
-                created_by: { email: 'system' },
-                source: 'band',
-                bandData: band,
-                category: category.name
-              });
+              if (date) {
+                const bandEvent = {
+                  id: `band-${band.name}-${date.getTime()}`,
+                  title: band.name,
+                  description: band.description,
+                  event_date: date.toISOString().split('T')[0],
+                  event_time: times[index] || times[0],
+                  location: 'Beach Stage',
+                  event_type: 'concert',
+                  created_by: { email: 'system' },
+                  source: 'band',
+                  bandData: band,
+                  category: category.name
+                };
+                bandEvents.push(bandEvent);
+              }
             });
           }
         });

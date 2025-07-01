@@ -141,6 +141,10 @@ export const eventService = {
     }
   },
 
+  async getAllEvents() {
+    return this.getEvents(); // Alias for consistency
+  },
+
   async createEvent(eventData) {
     try {
       const response = await api.post('/api/events', eventData);
