@@ -511,10 +511,19 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
         backgroundColor: '#ffffff',
         borderRadius: '0.75rem',
         boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        maxWidth: '100%',
+        width: '100%'
       }}>
         {/* Calendar Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', backgroundColor: '#e5e7eb' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(7, 1fr)', 
+          gap: '1px', 
+          backgroundColor: '#e5e7eb',
+          maxWidth: '100%',
+          width: '100%'
+        }}>
           {/* Day Headers */}
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} style={{
@@ -537,13 +546,15 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
             
             return (
               <div key={index} style={{
-                minHeight: '100px',
+                minHeight: '80px',
                 backgroundColor: date ? '#ffffff' : '#f9fafb',
-                padding: '0.5rem',
+                padding: '0.25rem',
                 position: 'relative',
                 cursor: date ? 'pointer' : 'default',
                 border: isToday ? '2px solid #0891b2' : 'none',
-                transition: 'background-color 0.2s'
+                transition: 'background-color 0.2s',
+                fontSize: '0.75rem',
+                overflow: 'hidden'
               }}
               onClick={() => date && setSelectedDate(date)}
               onMouseEnter={(e) => {
@@ -948,7 +959,7 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       alignItems: 'center',
       marginBottom: '1rem',
       flexWrap: 'wrap',
-      gap: '0.75rem'
+      gap: '0.5rem'
     },
     title: {
       fontSize: '1.5rem',
