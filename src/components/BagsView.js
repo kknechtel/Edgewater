@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 
 const BagsView = () => {
   const { user } = useAuth();
@@ -982,8 +983,12 @@ const BagsView = () => {
         ))}
       </div>
 
-      {/* Player Setup */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      {/* Player Setup - Mobile Responsive */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: getMobileOptimizedStyles().breakpoints.isMobile ? '1fr' : '1fr 1fr', 
+        gap: getMobileOptimizedStyles().spacing.sm 
+      }}>
         {['team1', 'team2'].map((team, teamIndex) => (
           <div key={team} style={{ 
             border: '2px solid #e5e7eb', 
@@ -1033,9 +1038,13 @@ const BagsView = () => {
               </div>
             ))}
             
-            {/* Add Player */}
+            {/* Add Player - Mobile Friendly */}
             {setupState[`${team}Players`].length < 2 && (
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: getMobileOptimizedStyles().breakpoints.isMobile ? 'column' : 'row',
+                gap: getMobileOptimizedStyles().spacing.sm 
+              }}>
                 <select
                   value=""
                   onChange={(e) => {
@@ -1046,11 +1055,12 @@ const BagsView = () => {
                   }}
                   style={{
                     flex: 1,
-                    padding: '0.5rem',
+                    padding: getMobileOptimizedStyles().spacing.sm,
                     border: '1px solid #d1d5db',
                     borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    backgroundColor: 'white'
+                    fontSize: getMobileOptimizedStyles().breakpoints.isMobile ? '1rem' : '0.875rem',
+                    backgroundColor: 'white',
+                    minHeight: '44px'
                   }}
                 >
                   <option value="">Select app user...</option>
@@ -1070,18 +1080,22 @@ const BagsView = () => {
                       ))
                   )}
                 </select>
-                <span style={{ alignSelf: 'center', color: '#6b7280' }}>OR</span>
+                {!getMobileOptimizedStyles().breakpoints.isMobile && (
+                  <span style={{ alignSelf: 'center', color: '#6b7280' }}>OR</span>
+                )}
                 <input
                   type="text"
                   value={setupState.newPlayerName}
                   onChange={(e) => setSetupState(prev => ({ ...prev, newPlayerName: e.target.value }))}
                   placeholder="Custom name"
                   style={{
-                    width: '8rem',
-                    padding: '0.5rem',
+                    width: getMobileOptimizedStyles().breakpoints.isMobile ? '100%' : '8rem',
+                    padding: getMobileOptimizedStyles().spacing.sm,
                     border: '1px solid #d1d5db',
                     borderRadius: '0.5rem',
-                    fontSize: '0.875rem'
+                    fontSize: getMobileOptimizedStyles().breakpoints.isMobile ? '1rem' : '0.875rem',
+                    minHeight: '44px',
+                    boxSizing: 'border-box'
                   }}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && setupState.newPlayerName) {

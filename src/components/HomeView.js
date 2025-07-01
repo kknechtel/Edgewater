@@ -4,6 +4,7 @@ import { fetchWeatherData, fetchSurfReport } from '../services/weatherService';
 import { rsvpService } from '../services/rsvpService';
 import { eventService } from '../services/api';
 import { bandGuideData } from '../data/bandGuideData';
+import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 import HomeEventsSection from './HomeEventsSection';
 
 const HomeView = ({ setActiveTab }) => {
@@ -180,31 +181,28 @@ const HomeView = ({ setActiveTab }) => {
     loadUpcomingEvents(); // Refresh events
   };
 
+  // Get mobile-optimized styles
+  const mobileStyles = getMobileOptimizedStyles();
+  
   const styles = {
-    container: {
-      minHeight: '100vh',
-      paddingBottom: '5rem',
-      backgroundColor: '#f9fafb'
-    },
-    header: {
-      backgroundColor: '#ffffff',
-      borderBottom: '1px solid #e5e7eb',
-      padding: '1.5rem',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
-    },
+    // Use mobile-optimized container, header, content, card styles
+    container: mobileStyles.container,
+    header: mobileStyles.header,
+    content: mobileStyles.content,
+    card: mobileStyles.card,
+    
+    // Custom styles that build on mobile optimization
     headerTop: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: '1rem'
+      marginBottom: mobileStyles.spacing.sm
     },
     logo: {
-      fontSize: '1.75rem',
-      fontWeight: '700',
+      ...mobileStyles.title,
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem',
-      color: '#111827'
+      gap: '0.5rem'
     },
     headerButtons: {
       display: 'flex',
@@ -213,9 +211,9 @@ const HomeView = ({ setActiveTab }) => {
     btnIcon: {
       backgroundColor: '#f3f4f6',
       border: '1px solid #e5e7eb',
-      padding: '0.5rem',
+      padding: mobileStyles.spacing.sm,
       borderRadius: '0.75rem',
-      fontSize: '1.25rem',
+      fontSize: mobileStyles.breakpoints.isMobile ? '1.125rem' : '1.25rem',
       cursor: 'pointer',
       minWidth: '44px',
       minHeight: '44px',
@@ -224,40 +222,22 @@ const HomeView = ({ setActiveTab }) => {
       justifyContent: 'center'
     },
     btnPrimary: {
-      backgroundColor: '#0891b2',
-      color: 'white',
-      border: 'none',
-      padding: '0.5rem 1rem',
-      borderRadius: '0.75rem',
-      fontSize: '0.875rem',
-      fontWeight: '600',
-      cursor: 'pointer',
-      minHeight: '44px'
+      ...mobileStyles.primaryButton,
+      padding: `${mobileStyles.spacing.sm} ${mobileStyles.spacing.md}`
     },
     welcomeText: {
-      fontSize: '1.125rem',
+      fontSize: mobileStyles.breakpoints.isMobile ? '1rem' : '1.125rem',
       color: '#4b5563',
       fontWeight: '500'
     },
     locationText: {
-      fontSize: '0.875rem',
-      color: '#6b7280',
+      ...mobileStyles.subtitle,
       marginTop: '0.25rem'
     },
-    content: {
-      padding: '1rem'
-    },
-    card: {
-      backgroundColor: '#ffffff',
-      borderRadius: '0.75rem',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-      padding: '1.5rem',
-      marginBottom: '1rem'
-    },
     cardTitle: {
-      fontSize: '1.25rem',
+      fontSize: mobileStyles.breakpoints.isMobile ? '1.125rem' : '1.25rem',
       fontWeight: '600',
-      marginBottom: '1rem',
+      marginBottom: mobileStyles.spacing.sm,
       display: 'flex',
       alignItems: 'center',
       gap: '0.5rem',
@@ -301,15 +281,8 @@ const HomeView = ({ setActiveTab }) => {
             <span>☀️</span> Weather & Surf
           </h2>
           
-          {/* Weather Tabs */}
-          <div style={{
-            display: 'flex',
-            backgroundColor: '#f3f4f6',
-            borderRadius: '0.75rem',
-            padding: '0.25rem',
-            marginBottom: '1rem',
-            gap: '0.25rem'
-          }}>
+          {/* Weather Tabs - Mobile Optimized */}
+          <div style={mobileStyles.weatherTabContainer}>
             {[
               { id: 'current', label: 'Current', icon: '☀️' },
               { id: 'hourly', label: 'Hourly', icon: '🕐' },
@@ -320,23 +293,7 @@ const HomeView = ({ setActiveTab }) => {
               return (
                 <button
                   key={tab.id}
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem 0.75rem',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    backgroundColor: isActive ? '#ffffff' : 'transparent',
-                    color: isActive ? '#0891b2' : '#6b7280',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.25rem',
-                    transition: 'all 0.2s',
-                    boxShadow: isActive ? '0 1px 3px 0 rgb(0 0 0 / 0.1)' : 'none'
-                  }}
+                  style={mobileStyles.weatherTab(isActive)}
                   onClick={() => setActiveWeatherTab(tab.id)}
                 >
                   <span style={{ fontSize: '1rem' }}>{tab.icon}</span>
@@ -350,10 +307,8 @@ const HomeView = ({ setActiveTab }) => {
           {activeWeatherTab === 'current' && (
             <>
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1rem',
-                marginBottom: '1.25rem'
+                ...mobileStyles.gridTwoColumn,
+                marginBottom: mobileStyles.spacing.lg
               }}>
                 <div style={{
                   backgroundColor: '#ecfeff',
@@ -578,12 +533,8 @@ const HomeView = ({ setActiveTab }) => {
           styles={styles}
         />
 
-        {/* Quick Actions */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '0.75rem'
-        }}>
+        {/* Quick Actions - Mobile Responsive */}
+        <div style={mobileStyles.gridThreeColumn}>
           <div 
             style={{
               backgroundColor: '#ffffff',
