@@ -55,6 +55,7 @@ const MobileApp = () => {
   ];
 
   const renderContent = () => {
+    console.log('🌟 MobileApp: Rendering content for activeTab:', activeTab);
     switch (activeTab) {
       case 'home':
         return <HomeView setActiveTab={setActiveTab} />;
@@ -80,6 +81,7 @@ const MobileApp = () => {
           <p>Band guide coming soon!</p>
         </div>;
       case 'weather':
+        console.log('🌟 MobileApp: Rendering WeatherDetailView component');
         return <WeatherDetailView />;
       case 'dinner':
         return <div style={{ padding: '2rem', textAlign: 'center' }}>

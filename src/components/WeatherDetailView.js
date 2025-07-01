@@ -14,14 +14,37 @@ const WeatherDetailView = () => {
   const loadWeatherData = async () => {
     try {
       setLoading(true);
+      console.log('🌟 WeatherDetailView: Starting to load weather data...');
       const [weatherData, surfReport] = await Promise.all([
-        fetchWeatherData(),
-        fetchSurfReport()
+        fetchWeatherData().catch(err => {
+          console.warn('Weather data failed:', err);
+          return null;
+        }),
+        fetchSurfReport().catch(err => {
+          console.warn('Surf data failed:', err);
+          return null;
+        })
       ]);
+      console.log('🌟 WeatherDetailView: Weather data loaded:', weatherData);
       setWeather(weatherData);
       setSurfData(surfReport);
     } catch (error) {
       console.error('Error loading weather data:', error);
+      // Set some default data so tabs still work
+      setWeather({
+        temp: '--',
+        condition: 'Loading...',
+        feelsLike: '--',
+        wind: 'Loading...',
+        humidity: '--'
+      });
+      setSurfData({
+        waveHeight: 'Loading...',
+        quality: 'Loading...',
+        waterTemp: '--',
+        crowd: 'Loading...',
+        tide: 'Loading...'
+      });
     } finally {
       setLoading(false);
     }
@@ -415,6 +438,8 @@ const WeatherDetailView = () => {
     }
   };
 
+  console.log('🌟 WeatherDetailView: Component rendering, activeTab:', activeTab, 'tabs:', tabs.length);
+  
   return (
     <div style={styles.container}>
       {/* Header */}
@@ -433,6 +458,7 @@ const WeatherDetailView = () => {
       }}>
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
+          console.log('🌟 Rendering weather tab:', tab.label, 'isActive:', isActive, 'tabId:', tab.id);
           return (
             <button
               key={tab.id}

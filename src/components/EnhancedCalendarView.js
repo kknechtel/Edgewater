@@ -546,15 +546,18 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
             
             return (
               <div key={index} style={{
-                minHeight: '80px',
+                minHeight: '60px',
+                maxHeight: '70px',
                 backgroundColor: date ? '#ffffff' : '#f9fafb',
-                padding: '0.25rem',
+                padding: '0.1rem',
                 position: 'relative',
                 cursor: date ? 'pointer' : 'default',
                 border: isToday ? '2px solid #0891b2' : 'none',
                 transition: 'background-color 0.2s',
-                fontSize: '0.75rem',
-                overflow: 'hidden'
+                fontSize: '0.7rem',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
               }}
               onClick={() => date && setSelectedDate(date)}
               onMouseEnter={(e) => {
@@ -571,29 +574,32 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
                   <>
                     <div style={{
                       fontWeight: isToday ? '700' : '500',
-                      fontSize: '0.875rem',
+                      fontSize: '0.75rem',
                       color: isToday ? '#0891b2' : isSelected ? '#111827' : '#374151',
-                      marginBottom: '0.5rem'
+                      marginBottom: '0.1rem',
+                      lineHeight: 1
                     }}>
                       {date.getDate()}
                     </div>
                     
                     {/* Event Pills */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      {dayEvents.slice(0, 3).map((event, idx) => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flex: 1 }}>
+                      {dayEvents.slice(0, 2).map((event, idx) => (
                         <div key={event.id} style={{
                           backgroundColor: getEventTypeColor(event.event_type) + '15',
                           color: '#111827',
                           border: `1px solid ${getEventTypeColor(event.event_type)}`,
-                          padding: '2px 4px',
-                          borderRadius: '4px',
-                          fontSize: '0.625rem',
+                          padding: '1px 2px',
+                          borderRadius: '2px',
+                          fontSize: '0.5rem',
                           fontWeight: '600',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           cursor: 'pointer',
-                          transition: 'all 0.2s'
+                          transition: 'all 0.2s',
+                          lineHeight: 1,
+                          maxHeight: '12px'
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
