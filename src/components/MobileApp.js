@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { notificationService } from '../services/notificationService';
 import EnhancedCalendarView from './EnhancedCalendarView';
 import SasqWatch from './features/SasqWatch';
@@ -11,6 +12,7 @@ import UserProfile from './UserProfile';
 
 const MobileApp = () => {
   const { logout, user } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('home');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -77,7 +79,8 @@ const MobileApp = () => {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: '#f0f9ff',
+      backgroundColor: isDarkMode ? '#0f172a' : '#f0f9ff',
+      color: isDarkMode ? '#f1f5f9' : '#111827',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       margin: 0,
       padding: 0,
@@ -111,35 +114,73 @@ const MobileApp = () => {
           </h1>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
-              onClick={() => setShowProfile(true)}
+              onClick={toggleTheme}
               style={{
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 border: 'none',
-                padding: '0.5rem 1rem',
+                padding: '0.5rem',
                 borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer'
+                fontSize: '1.25rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
+              title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
             >
-              👤 Profile
+              {isDarkMode ? '☀️' : '🌙'}
             </button>
-            <button
-              onClick={logout}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: 'none',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              Logout
-            </button>
+            {user ? (
+              <>
+                <button
+                  onClick={() => setShowProfile(true)}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  👤 Profile
+                </button>
+                <button
+                  onClick={logout}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => window.location.href = '/login'}
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                Login
+              </button>
+            )}
           </div>
         </header>
       )}
@@ -157,8 +198,8 @@ const MobileApp = () => {
 
       {/* Bottom Navigation */}
       <nav style={{
-        backgroundColor: 'white',
-        borderTop: '1px solid #e5e7eb',
+        backgroundColor: isDarkMode ? '#1e293b' : 'white',
+        borderTop: `1px solid ${isDarkMode ? '#334155' : '#e5e7eb'}`,
         position: 'fixed',
         bottom: 0,
         left: 0,

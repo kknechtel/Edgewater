@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { fetchWeatherData, fetchSurfReport, startWeatherUpdates } from '../../services/weatherService';
 import { bandGuideData } from '../../data/bandGuideData';
 import { locationService } from '../../services/locationService';
@@ -8,6 +9,7 @@ import { rsvpService } from '../../services/rsvpService';
 
 const HomeView = ({ setActiveTab }) => {
   const { user, logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState({
     temp: 78,
@@ -352,22 +354,62 @@ const HomeView = ({ setActiveTab }) => {
           }}>
             🏖️ Clubbers
           </h1>
-          <button
-            onClick={logout}
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              backdropFilter: 'blur(4px)',
-              color: 'white',
-              border: 'none',
-              padding: '0.375rem 0.75rem',
-              borderRadius: '1rem',
-              fontSize: '0.75rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-          >
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={toggleTheme}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(4px)',
+                color: 'white',
+                border: 'none',
+                padding: '0.375rem',
+                borderRadius: '1rem',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+            {user ? (
+              <button
+                onClick={logout}
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(4px)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.375rem 0.75rem',
+                  borderRadius: '1rem',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={() => window.location.href = '/login'}
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(4px)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.375rem 0.75rem',
+                  borderRadius: '1rem',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                Login
+              </button>
+            )}
+          </div>
         </div>
         <p style={{ fontSize: '1.125rem', opacity: 0.9, margin: 0 }}>
           Welcome back, {user?.first_name || 'Beach Lover'}!
