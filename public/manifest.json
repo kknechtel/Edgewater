@@ -4,6 +4,12 @@
   "description": "Your beach club community app for events, music, bags tournaments, and more",
   "icons": [
     {
+      "src": "edgewater-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    },
+    {
       "src": "beach-icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
