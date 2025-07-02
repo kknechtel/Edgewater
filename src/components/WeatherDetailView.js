@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchWeatherData, fetchSurfReport } from '../services/weatherService';
+import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 
 const WeatherDetailView = () => {
   const [activeTab, setActiveTab] = useState('current');
@@ -57,18 +58,11 @@ const WeatherDetailView = () => {
     { id: 'surf', label: 'Surf', icon: '🏄' }
   ];
 
+  const mobileStyles = getMobileOptimizedStyles();
+  
   const styles = {
-    container: {
-      minHeight: '100vh',
-      paddingBottom: '5rem',
-      backgroundColor: '#f9fafb'
-    },
-    header: {
-      backgroundColor: '#ffffff',
-      borderBottom: '1px solid #e5e7eb',
-      padding: '1.5rem',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
-    },
+    container: mobileStyles.container,
+    header: mobileStyles.header,
     title: {
       fontSize: '1.75rem',
       fontWeight: '700',
@@ -448,13 +442,11 @@ const WeatherDetailView = () => {
         <p style={styles.location}>📍 Sea Bright, NJ</p>
       </div>
 
-      {/* Tab Bar - Simple horizontal tabs across the top */}
+      {/* Tab Bar - Mobile Optimized */}
       <div style={{
-        display: 'flex',
+        ...mobileStyles.weatherTabContainer,
         backgroundColor: '#ffffff',
-        borderBottom: '1px solid #e5e7eb',
-        overflowX: 'auto',
-        WebkitOverflowScrolling: 'touch'
+        borderBottom: '1px solid #e5e7eb'
       }}>
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
@@ -462,23 +454,7 @@ const WeatherDetailView = () => {
           return (
             <button
               key={tab.id}
-              style={{
-                flex: 1,
-                minWidth: '80px',
-                padding: '0.75rem 1rem',
-                border: 'none',
-                backgroundColor: 'transparent',
-                color: isActive ? '#0891b2' : '#6b7280',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.25rem',
-                position: 'relative',
-                transition: 'all 0.2s'
-              }}
+              style={mobileStyles.weatherTab(isActive)}
               onClick={() => setActiveTab(tab.id)}
             >
               {/* Active indicator */}

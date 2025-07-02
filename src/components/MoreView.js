@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 
 const MoreView = ({ setActiveTab }) => {
   const { user } = useAuth();
@@ -55,18 +56,11 @@ const MoreView = ({ setActiveTab }) => {
     }
   ];
 
+  const mobileStyles = getMobileOptimizedStyles();
+  
   const styles = {
-    container: {
-      minHeight: '100vh',
-      paddingBottom: '5rem',
-      backgroundColor: '#f9fafb'
-    },
-    header: {
-      backgroundColor: '#ffffff',
-      borderBottom: '1px solid #e5e7eb',
-      padding: '1.5rem',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
-    },
+    container: mobileStyles.container,
+    header: mobileStyles.header,
     title: {
       fontSize: '1.75rem',
       fontWeight: '700',
@@ -77,16 +71,8 @@ const MoreView = ({ setActiveTab }) => {
       fontSize: '0.875rem',
       color: '#6b7280'
     },
-    content: {
-      padding: '1rem'
-    },
-    card: {
-      backgroundColor: '#ffffff',
-      borderRadius: '0.75rem',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-      padding: '1.5rem',
-      marginBottom: '1rem'
-    },
+    content: mobileStyles.content,
+    card: mobileStyles.card,
     cardTitle: {
       fontSize: '1.25rem',
       fontWeight: '600',
@@ -98,8 +84,8 @@ const MoreView = ({ setActiveTab }) => {
     },
     featureGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(2, 1fr)',
-      gap: '0.75rem'
+      gridTemplateColumns: mobileStyles.breakpoints.isSmallMobile ? '1fr' : 'repeat(2, 1fr)',
+      gap: mobileStyles.spacing.sm
     },
     featureButton: {
       backgroundColor: '#ffffff',
