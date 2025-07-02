@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { eventService } from '../services/api';
-import { bandGuideData } from '../data/bandGuideData';
+import { unifiedEventService } from '../services/unifiedEventService';
 import { rsvpService } from '../services/rsvpService';
 import { notificationService } from '../services/notificationService';
 import { commentsService } from '../services/commentsService';
@@ -63,65 +62,9 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
     try {
       setLoading(true);
       
-      // Load events from backend API  
-      let apiEvents = [];
-      try {
-        const response = await eventService.getAllEvents();
-        apiEvents = Array.isArray(response) ? response : (response.events || response.data || []);
-      } catch (error) {
-        console.log('API events failed, using empty array:', error);
-        apiEvents = [];
-      }
-      
-      // Load band events from bandGuideData
-      const bandEvents = [];
-      bandGuideData.categories.forEach(category => {
-        category.bands.forEach(band => {
-          if (band.date) {
-            const dates = parseBandDates(band.date);
-            const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
-            
-            dates.forEach((date, index) => {
-              if (date) {
-                const bandEvent = {
-                  id: `band-${band.name}-${date.getTime()}`,
-                  title: band.name,
-                  description: band.description,
-                  event_date: date.toISOString().split('T')[0],
-                  event_time: times[index] || times[0],
-                  location: 'Beach Stage',
-                  event_type: 'concert',
-                  created_by: { email: 'system' },
-                  source: 'band',
-                  bandData: band,
-                  category: category.name
-                };
-                bandEvents.push(bandEvent);
-              }
-            });
-          }
-        });
-      });
-      
-      // Load bags tournament events from localStorage
-      const savedTournaments = localStorage.getItem('bags_tournaments');
-      const tournamentEvents = savedTournaments ? JSON.parse(savedTournaments)
-        .filter(t => t.date)
-        .map(tournament => ({
-          id: `tournament-${tournament.id}`,
-          title: tournament.name,
-          description: tournament.description || `${tournament.type}-player Bags Tournament`,
-          event_date: tournament.date,
-          event_time: tournament.time || '2:00 PM',
-          location: 'Bags Court',
-          event_type: 'tournament',
-          created_by: { email: tournament.createdBy || user?.email || 'system' },
-          source: 'bags',
-          tournamentData: tournament
-        })) : [];
-      
-      // Combine all events
-      const allEvents = [...apiEvents, ...bandEvents, ...tournamentEvents];
+      // Load all events using unified service
+      const allEvents = await unifiedEventService.getAllEvents();
+      console.log('📅 Calendar loaded', allEvents.length, 'unified events');
       
       // Enrich events with attendee data from RSVP service and comment counts
       const enrichedEvents = allEvents.map(event => ({
@@ -868,7 +811,8 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
           const updated = tournaments.filter(t => `tournament-${t.id}` !== eventId);
           localStorage.setItem('bags_tournaments', JSON.stringify(updated));
         } else {
-          await eventService.deleteEvent(eventId);
+          // Delete API event using unifiedEventService
+          await unifiedEventService.deleteEvent(eventId);
         }
         await loadEvents();
       } catch (error) {

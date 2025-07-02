@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchWeatherData, fetchSurfReport } from '../services/weatherService';
 import { rsvpService } from '../services/rsvpService';
-import { eventService } from '../services/api';
-import { bandGuideData } from '../data/bandGuideData';
+import { unifiedEventService } from '../services/unifiedEventService';
 import { commentsService } from '../services/commentsService';
 import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 import HomeEventsSection from './HomeEventsSection';
@@ -36,7 +35,9 @@ const HomeView = ({ setActiveTab }) => {
         console.error('Error loading weather data:', error);
       });
 
-      // Load events
+      // Clear cache and load events
+      unifiedEventService.clearCache();
+      console.log('🏠 HomeView: Cleared cache, loading fresh 2025 events');
       await loadUpcomingEvents();
 
       // Load recent sightings count
@@ -81,146 +82,22 @@ const HomeView = ({ setActiveTab }) => {
 
   const loadUpcomingEvents = async () => {
     try {
-      // Load events from backend API  
-      let apiEvents = [];
-      try {
-        const response = await eventService.getAllEvents();
-        const rawEvents = Array.isArray(response) ? response : (response.events || response.data || []);
-        
-        // Transform API events to match expected format
-        apiEvents = rawEvents.map(event => ({
-          ...event,
-          event_date: event.date ? event.date.split('T')[0] : event.event_date,
-          event_time: event.date ? 
-            new Date(event.date).toLocaleTimeString('en-US', { 
-              hour: 'numeric', 
-              minute: '2-digit', 
-              hour12: true 
-            }) : (event.event_time || 'Time TBD'),
-          event_type: event.event_type || 'other'
-        }));
-      } catch (error) {
-        console.log('API events failed, using empty array:', error);
-        apiEvents = [];
-      }
+      console.log('🏠 Loading events for HomeView with unified service...');
       
-      // Load band events from bandGuideData (same logic as EnhancedCalendarView)
-      const bandEvents = [];
-      bandGuideData.categories.forEach(category => {
-        category.bands.forEach(band => {
-          if (band.date) {
-            const dates = parseBandDates(band.date);
-            const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
-            
-            dates.forEach((date, index) => {
-              if (date) {
-                const bandEvent = {
-                  id: `band-${band.name}-${date.getTime()}`,
-                  title: band.name,
-                  description: band.description,
-                  event_date: date.toISOString().split('T')[0],
-                  event_time: times[index] || times[0],
-                  location: 'Beach Stage',
-                  event_type: 'concert',
-                  created_by: { email: 'system' },
-                  source: 'band',
-                  bandData: band,
-                  category: category.name
-                };
-                bandEvents.push(bandEvent);
-              }
-            });
-          }
-        });
-      });
-      
-      // Load bags tournament events from localStorage (same as EnhancedCalendarView)
-      const savedTournaments = localStorage.getItem('bags_tournaments');
-      const tournamentEvents = savedTournaments ? JSON.parse(savedTournaments)
-        .filter(t => t.date)
-        .map(tournament => ({
-          id: `tournament-${tournament.id}`,
-          title: tournament.name,
-          description: tournament.description || `${tournament.type}-player Bags Tournament`,
-          event_date: tournament.date,
-          event_time: tournament.time || '2:00 PM',
-          location: 'Bags Court',
-          event_type: 'tournament',
-          created_by: { email: tournament.createdBy || user?.email || 'system' },
-          source: 'bags',
-          tournamentData: tournament
-        })) : [];
-      
-      // Combine all events
-      const allEvents = [...apiEvents, ...bandEvents, ...tournamentEvents];
-      
-      // Filter and sort upcoming events
-      const now = new Date();
-      now.setHours(0, 0, 0, 0); // Start of today
-      
-      const upcoming = allEvents
-        .filter(event => {
-          const eventDate = new Date(event.event_date || event.date);
-          return eventDate >= now;
-        })
-        .sort((a, b) => {
-          const dateA = new Date(a.event_date || a.date);
-          const dateB = new Date(b.event_date || b.date);
-          return dateA - dateB;
-        })
-        .slice(0, 5); // Show first 5 upcoming events
-      
-      // Add demo events if we don't have any upcoming events
-      let finalEvents = upcoming;
-      if (upcoming.length === 0) {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const nextWeek = new Date();
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        const nextMonth = new Date();
-        nextMonth.setDate(nextMonth.getDate() + 30);
-        
-        finalEvents = [
-          {
-            id: 'demo-event-1',
-            title: 'Beach Volleyball Tournament',
-            description: 'Join us for a fun volleyball tournament on the beach!',
-            event_date: tomorrow.toISOString().split('T')[0],
-            event_time: '2:00 PM',
-            location: 'Main Beach Court',
-            event_type: 'tournament'
-          },
-          {
-            id: 'demo-event-2',
-            title: 'Live Music - The Wave Riders',
-            description: 'Enjoy live music by the beach with The Wave Riders band',
-            event_date: nextWeek.toISOString().split('T')[0],
-            event_time: '6:00 PM',
-            location: 'Beach Stage',
-            event_type: 'concert'
-          },
-          {
-            id: 'demo-event-3',
-            title: 'Sunrise Yoga Session',
-            description: 'Start your day with peaceful yoga by the ocean',
-            event_date: nextMonth.toISOString().split('T')[0],
-            event_time: '7:00 AM',
-            location: 'East Beach',
-            event_type: 'gathering'
-          }
-        ];
-      }
+      // Use the unified event service to get upcoming events
+      const upcomingEvents = await unifiedEventService.getUpcomingEvents(5);
       
       // Enrich with RSVP data and comments
-      const enrichedEvents = finalEvents.map(event => ({
+      const enrichedEvents = upcomingEvents.map(event => ({
         ...event,
         attendees: rsvpService.getEventAttendees(event.id),
         attendeeCount: rsvpService.getAttendeeCount(event.id),
         comments: commentsService.getEventComments(event.id),
         commentCount: commentsService.getCommentCount(event.id),
-        userRsvp: rsvpService.getUserRsvp(event.id, user?.id)
+        userRsvp: rsvpService.getUserRSVPStatus(event.id, user?.id)
       }));
       
+      console.log('✅ HomeView loaded', enrichedEvents.length, 'unified events');
       setUpcomingEvents(enrichedEvents);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -258,18 +135,16 @@ const HomeView = ({ setActiveTab }) => {
       return;
     }
     
-    const currentRsvp = rsvpService.getUserRsvp(eventId, user.id);
-    if (currentRsvp) {
-      rsvpService.removeRsvp(eventId, user.id);
+    const currentRsvp = rsvpService.getUserRSVPStatus(eventId, user.id);
+    if (currentRsvp === 'going') {
+      rsvpService.rsvpToEvent(eventId, user.id, user.display_name || user.first_name || 'Anonymous', 'none');
     } else {
-      rsvpService.addRsvp(eventId, {
-        userId: user.id,
-        userName: user.display_name || user.first_name || 'Anonymous',
-        status: 'going'
-      });
+      rsvpService.rsvpToEvent(eventId, user.id, user.display_name || user.first_name || 'Anonymous', 'going');
     }
     
-    loadUpcomingEvents(); // Refresh events
+    // Clear the unified service cache and refresh events
+    unifiedEventService.clearCache();
+    loadUpcomingEvents();
   };
 
   // Get mobile-optimized styles
@@ -287,13 +162,15 @@ const HomeView = ({ setActiveTab }) => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: mobileStyles.spacing.sm
+      marginBottom: '0.25rem'
     },
     logo: {
-      ...mobileStyles.title,
+      fontSize: mobileStyles.breakpoints.isMobile ? '1.25rem' : '1.5rem',
+      fontWeight: '700',
+      color: '#111827',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem'
+      gap: '0.375rem'
     },
     headerButtons: {
       display: 'flex',
@@ -302,12 +179,12 @@ const HomeView = ({ setActiveTab }) => {
     btnIcon: {
       backgroundColor: '#f3f4f6',
       border: '1px solid #e5e7eb',
-      padding: mobileStyles.spacing.sm,
-      borderRadius: '0.75rem',
-      fontSize: mobileStyles.breakpoints.isMobile ? '1.125rem' : '1.25rem',
+      padding: '0.5rem',
+      borderRadius: '0.5rem',
+      fontSize: '1rem',
       cursor: 'pointer',
-      minWidth: '48px',
-      minHeight: '48px',
+      minWidth: '36px',
+      minHeight: '36px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -317,22 +194,24 @@ const HomeView = ({ setActiveTab }) => {
       padding: `${mobileStyles.spacing.sm} ${mobileStyles.spacing.md}`
     },
     welcomeText: {
-      fontSize: mobileStyles.breakpoints.isMobile ? '1.125rem' : '1.25rem',
+      fontSize: mobileStyles.breakpoints.isMobile ? '0.9375rem' : '1rem',
       color: '#4b5563',
       fontWeight: '500',
-      lineHeight: '1.5'
+      lineHeight: '1.4',
+      marginBottom: '0.125rem'
     },
     locationText: {
-      ...mobileStyles.subtitle,
-      marginTop: '0.25rem'
+      fontSize: mobileStyles.breakpoints.isMobile ? '0.8125rem' : '0.875rem',
+      color: '#6b7280',
+      fontWeight: '400'
     },
     cardTitle: {
-      fontSize: mobileStyles.breakpoints.isMobile ? '1.125rem' : '1.25rem',
+      fontSize: mobileStyles.breakpoints.isMobile ? '1rem' : '1.125rem',
       fontWeight: '600',
-      marginBottom: mobileStyles.spacing.sm,
+      marginBottom: '0.5rem',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem',
+      gap: '0.375rem',
       color: '#111827'
     }
   };
@@ -491,30 +370,31 @@ const HomeView = ({ setActiveTab }) => {
             <div style={{
               display: 'flex',
               overflowX: 'auto',
-              gap: '0.75rem',
-              paddingBottom: '0.5rem',
+              gap: '0.5rem',
+              paddingBottom: '0.25rem',
               WebkitOverflowScrolling: 'touch'
             }}>
               {weather.hourly.slice(0, 12).map((hour, index) => (
                 <div key={index} style={{
                   backgroundColor: '#f3f4f6',
-                  borderRadius: '0.75rem',
-                  padding: '1rem',
-                  minWidth: '100px',
+                  borderRadius: '0.5rem',
+                  padding: '0.75rem 0.5rem',
+                  minWidth: '70px',
                   textAlign: 'center',
-                  border: '1px solid #e5e7eb'
+                  border: '1px solid #e5e7eb',
+                  flexShrink: 0
                 }}>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.6875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
                     {hour.time}
                   </div>
-                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>
                     {hour.icon}
                   </div>
-                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>
                     {hour.temp}°
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                    {hour.condition}
+                  <div style={{ fontSize: '0.625rem', color: '#6b7280', marginTop: '0.125rem' }}>
+                    {hour.condition.split(' ')[0]}
                   </div>
                 </div>
               ))}
