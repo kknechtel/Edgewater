@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 
 export const getMobileOptimizedStyles = () => {
-  // Get actual viewport dimensions
-  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-  const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+  // Get actual viewport dimensions safely
+  const vw = typeof window !== 'undefined' ? Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) : 768;
+  const vh = typeof window !== 'undefined' ? Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0) : 1024;
   
   // Mobile breakpoints based on 2024 standards
   const isMobile = vw <= 768;
@@ -198,7 +198,7 @@ export const responsive = {
   
   // Safe spacing based on screen size
   spacing: (multiplier = 1) => {
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const vw = typeof window !== 'undefined' ? Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) : 768;
     const base = Math.max(0.5, Math.min(1.5, vw * 0.04));
     return `${base * multiplier}rem`;
   }
