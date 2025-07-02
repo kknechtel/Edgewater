@@ -306,8 +306,8 @@ const HomeView = ({ setActiveTab }) => {
       borderRadius: '0.75rem',
       fontSize: mobileStyles.breakpoints.isMobile ? '1.125rem' : '1.25rem',
       cursor: 'pointer',
-      minWidth: '44px',
-      minHeight: '44px',
+      minWidth: '48px',
+      minHeight: '48px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -317,9 +317,10 @@ const HomeView = ({ setActiveTab }) => {
       padding: `${mobileStyles.spacing.sm} ${mobileStyles.spacing.md}`
     },
     welcomeText: {
-      fontSize: mobileStyles.breakpoints.isMobile ? '1rem' : '1.125rem',
+      fontSize: mobileStyles.breakpoints.isMobile ? '1.125rem' : '1.25rem',
       color: '#4b5563',
-      fontWeight: '500'
+      fontWeight: '500',
+      lineHeight: '1.5'
     },
     locationText: {
       ...mobileStyles.subtitle,
@@ -349,6 +350,8 @@ const HomeView = ({ setActiveTab }) => {
             <button 
               style={styles.btnIcon}
               onClick={() => setActiveTab('profile')}
+              aria-label="Open settings and profile"
+              role="button"
             >
               ⚙️
             </button>
@@ -386,8 +389,11 @@ const HomeView = ({ setActiveTab }) => {
                   key={tab.id}
                   style={mobileStyles.weatherTab(isActive)}
                   onClick={() => setActiveWeatherTab(tab.id)}
+                  aria-label={`View ${tab.label} weather information`}
+                  aria-pressed={isActive}
+                  role="tab"
                 >
-                  <span style={{ fontSize: '1rem' }}>{tab.icon}</span>
+                  <span style={{ fontSize: '1rem' }} aria-hidden="true">{tab.icon}</span>
                   <span>{tab.label}</span>
                 </button>
               );
@@ -636,7 +642,7 @@ const HomeView = ({ setActiveTab }) => {
               textAlign: 'center',
               boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
               transition: 'all 0.2s',
-              minHeight: '100px',
+              minHeight: mobileStyles.breakpoints.isMobile ? '120px' : '100px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -663,7 +669,7 @@ const HomeView = ({ setActiveTab }) => {
               textAlign: 'center',
               boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
               transition: 'all 0.2s',
-              minHeight: '100px',
+              minHeight: mobileStyles.breakpoints.isMobile ? '120px' : '100px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -680,32 +686,53 @@ const HomeView = ({ setActiveTab }) => {
             </p>
           </div>
           
-          <div 
+          <button 
             style={{
               backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.75rem',
-              padding: '1rem',
+              border: '2px solid #e5e7eb',
+              borderRadius: '1rem',
+              padding: mobileStyles.spacing.lg,
               cursor: 'pointer',
               textAlign: 'center',
-              boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
               transition: 'all 0.2s',
-              minHeight: '100px',
+              minHeight: '140px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              transform: 'scale(1)'
             }}
             onClick={() => setActiveTab('more')}
+            onTouchStart={(e) => {
+              e.currentTarget.style.transform = 'scale(0.95)';
+              e.currentTarget.style.borderColor = '#8b5cf6';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(139, 92, 246, 0.2)';
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.borderColor = '#8b5cf6';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 92, 246, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+            }}
           >
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎸</div>
-            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.125rem' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎸</div>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: '500' }}>
               Live Music
             </p>
-            <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#8b5cf6' }}>
+            <p style={{ fontSize: '1rem', fontWeight: '700', color: '#8b5cf6' }}>
               Band Guide
             </p>
-          </div>
+          </button>
         </div>
       </div>
     </div>

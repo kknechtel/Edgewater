@@ -110,31 +110,34 @@ const MessagesView = () => {
       height: 'calc(100vh - 60px)',
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: '#f9fafb',
+      backgroundColor: '#f0f9ff',
       position: 'relative'
     },
     header: {
       backgroundColor: '#ffffff',
-      borderBottom: '1px solid #e5e7eb',
+      borderBottom: '2px solid #0891b2',
       padding: '1rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+      textAlign: 'center',
+      boxShadow: '0 2px 8px rgba(8, 145, 178, 0.2)'
     },
     channelButton: {
-      backgroundColor: '#f3f4f6',
-      border: '1px solid #e5e7eb',
-      borderRadius: '0.75rem',
-      padding: '0.5rem 1rem',
-      fontSize: '0.875rem',
-      fontWeight: '600',
-      color: '#111827',
+      position: 'fixed',
+      bottom: '6rem',
+      left: '1rem',
+      backgroundColor: '#0891b2',
+      border: 'none',
+      borderRadius: '50%',
+      width: '56px',
+      height: '56px',
+      fontSize: '1.5rem',
+      color: 'white',
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem',
-      minHeight: '44px'
+      justifyContent: 'center',
+      boxShadow: '0 4px 16px rgba(8, 145, 178, 0.4)',
+      zIndex: 100,
+      transition: 'all 0.2s'
     },
     messagesContainer: {
       flex: 1,
@@ -169,32 +172,39 @@ const MessagesView = () => {
     },
     inputContainer: {
       backgroundColor: '#ffffff',
-      borderTop: '1px solid #e5e7eb',
+      borderTop: '2px solid #e5e7eb',
       padding: '1rem',
       display: 'flex',
       gap: '0.75rem',
-      alignItems: 'center'
+      alignItems: 'center',
+      boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.1)',
+      paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))'
     },
     input: {
       flex: 1,
-      padding: '0.75rem',
-      border: '1px solid #e5e7eb',
-      borderRadius: '0.75rem',
-      fontSize: '1rem',
+      padding: '1rem',
+      border: '2px solid #e5e7eb',
+      borderRadius: '1.5rem',
+      fontSize: '1.125rem',
       outline: 'none',
-      minHeight: '44px'
+      minHeight: '56px',
+      backgroundColor: '#f8fafc',
+      transition: 'all 0.2s'
     },
     sendButton: {
       backgroundColor: '#0891b2',
       color: 'white',
       border: 'none',
-      borderRadius: '0.75rem',
-      padding: '0 1.5rem',
-      fontSize: '1rem',
-      fontWeight: '600',
+      borderRadius: '50%',
+      width: '56px',
+      height: '56px',
+      fontSize: '1.25rem',
+      fontWeight: '700',
       cursor: 'pointer',
-      minHeight: '44px',
-      minWidth: '80px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 4px 16px rgba(8, 145, 178, 0.3)',
       transition: 'all 0.2s'
     },
     channelModal: {
@@ -224,13 +234,14 @@ const MessagesView = () => {
       alignItems: 'center'
     },
     channelItem: {
-      padding: '1rem 1.5rem',
+      padding: '1.5rem',
       borderBottom: '1px solid #f3f4f6',
       cursor: 'pointer',
-      transition: 'background-color 0.2s',
+      transition: 'all 0.2s',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
+      minHeight: '80px'
     }
   };
 
@@ -240,30 +251,36 @@ const MessagesView = () => {
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <div>
-          <h2 style={{
-            fontSize: '1.25rem',
-            fontWeight: '700',
-            color: '#111827',
-            marginBottom: '0.25rem'
-          }}>
-            {currentChannel?.name}
-          </h2>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#6b7280'
-          }}>
-            {currentChannel?.description}
-          </p>
-        </div>
-        <button
-          style={styles.channelButton}
-          onClick={() => setShowChannels(true)}
-        >
-          <span>📋</span>
-          <span>Channels</span>
-        </button>
+        <h2 style={{
+          fontSize: '1.5rem',
+          fontWeight: '700',
+          color: '#111827',
+          marginBottom: '0.25rem'
+        }}>
+          {currentChannel?.name}
+        </h2>
+        <p style={{
+          fontSize: '1rem',
+          color: '#6b7280'
+        }}>
+          {currentChannel?.description}
+        </p>
       </div>
+
+      {/* Floating Channel Button */}
+      <button
+        style={styles.channelButton}
+        onClick={() => setShowChannels(true)}
+        onTouchStart={(e) => {
+          e.currentTarget.style.transform = 'scale(0.95)';
+        }}
+        onTouchEnd={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+        aria-label="Switch channels"
+      >
+        📋
+      </button>
 
       {/* Messages */}
       <div style={styles.messagesContainer}>
@@ -344,9 +361,13 @@ const MessagesView = () => {
           style={styles.input}
           onFocus={(e) => {
             e.target.style.borderColor = '#0891b2';
+            e.target.style.backgroundColor = '#ffffff';
+            e.target.style.boxShadow = '0 0 0 3px rgba(8, 145, 178, 0.1)';
           }}
           onBlur={(e) => {
             e.target.style.borderColor = '#e5e7eb';
+            e.target.style.backgroundColor = '#f8fafc';
+            e.target.style.boxShadow = 'none';
           }}
         />
         <button
@@ -357,16 +378,19 @@ const MessagesView = () => {
             opacity: newMessage.trim() ? 1 : 0.5,
             cursor: newMessage.trim() ? 'pointer' : 'not-allowed'
           }}
-          onMouseEnter={(e) => {
+          onTouchStart={(e) => {
             if (newMessage.trim()) {
-              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.transform = 'scale(0.95)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(8, 145, 178, 0.5)';
             }
           }}
-          onMouseLeave={(e) => {
+          onTouchEnd={(e) => {
             e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(8, 145, 178, 0.3)';
           }}
+          aria-label="Send message"
         >
-          Send
+          ➤
         </button>
       </form>
 

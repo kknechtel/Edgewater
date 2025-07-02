@@ -5,6 +5,7 @@ import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 const MoreView = ({ setActiveTab }) => {
   const { user } = useAuth();
   const [showLumaModal, setShowLumaModal] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
 
   const mainFeatures = [
     { id: 'music', label: 'Music', icon: '🎸', tab: 'music' },
@@ -58,94 +59,113 @@ const MoreView = ({ setActiveTab }) => {
 
   const mobileStyles = getMobileOptimizedStyles();
   
+  const containerStyle = {
+    minHeight: '100vh',
+    backgroundColor: '#f0f9ff',
+    paddingBottom: '6rem'
+  };
+
+  const headerStyle = {
+    backgroundColor: '#ffffff',
+    padding: mobileStyles.spacing.md,
+    textAlign: 'center',
+    borderBottom: '2px solid #0891b2',
+    boxShadow: '0 2px 8px rgba(8, 145, 178, 0.2)'
+  };
+
+  const cardStyle = {
+    ...mobileStyles.card,
+    marginBottom: mobileStyles.spacing.lg,
+    border: '1px solid #e5e7eb'
+  };
+
+  const cardTitleStyle = {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    marginBottom: mobileStyles.spacing.lg,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    color: '#111827'
+  };
+
+  const featureButtonStyle = {
+    backgroundColor: '#ffffff',
+    border: '2px solid #e5e7eb',
+    borderRadius: '1rem',
+    padding: mobileStyles.spacing.lg,
+    cursor: 'pointer',
+    textAlign: 'center',
+    transition: 'all 0.2s',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.75rem',
+    marginBottom: mobileStyles.spacing.md,
+    minHeight: '120px',
+    width: '100%',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+  };
+
+  const bigButtonStyle = {
+    width: '100%',
+    minHeight: '72px',
+    backgroundColor: '#0891b2',
+    color: 'white',
+    border: 'none',
+    borderRadius: '1rem',
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    marginBottom: mobileStyles.spacing.md,
+    boxShadow: '0 4px 16px rgba(8, 145, 178, 0.3)',
+    transition: 'all 0.2s',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.75rem'
+  };
+
   const styles = {
-    container: mobileStyles.container,
-    header: mobileStyles.header,
-    title: {
-      fontSize: '1.75rem',
-      fontWeight: '700',
-      color: '#111827',
-      marginBottom: '0.5rem'
-    },
-    subtitle: {
-      fontSize: '0.875rem',
-      color: '#6b7280'
-    },
-    content: mobileStyles.content,
-    card: mobileStyles.card,
-    cardTitle: {
-      fontSize: '1.25rem',
-      fontWeight: '600',
-      marginBottom: '1rem',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      color: '#111827'
-    },
-    featureGrid: {
-      display: 'grid',
-      gridTemplateColumns: mobileStyles.breakpoints.isSmallMobile ? '1fr' : 'repeat(2, 1fr)',
-      gap: mobileStyles.spacing.sm
-    },
-    featureButton: {
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: '0.75rem',
-      padding: '1rem',
-      cursor: 'pointer',
-      textAlign: 'center',
-      transition: 'all 0.2s',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '0.5rem'
-    },
-    featureIcon: {
-      fontSize: '2rem'
-    },
-    featureLabel: {
-      fontSize: '0.875rem',
-      fontWeight: '500',
-      color: '#111827'
-    },
     comingSoonCard: {
       backgroundColor: '#ffffff',
       border: '2px dashed #e5e7eb',
-      borderRadius: '0.75rem',
-      padding: '1rem',
+      borderRadius: '1rem',
+      padding: mobileStyles.spacing.lg,
       display: 'flex',
       alignItems: 'center',
-      gap: '1rem',
-      marginBottom: '0.75rem',
+      gap: mobileStyles.spacing.md,
+      marginBottom: mobileStyles.spacing.md,
       opacity: 0.8,
       transition: 'all 0.2s',
-      cursor: 'default'
+      cursor: 'default',
+      minHeight: '80px'
     },
     comingSoonIcon: {
-      fontSize: '2.5rem',
-      minWidth: '60px',
+      fontSize: '3rem',
+      minWidth: '72px',
       textAlign: 'center'
     },
     comingSoonContent: {
       flex: 1
     },
     comingSoonTitle: {
-      fontSize: '1rem',
+      fontSize: '1.125rem',
       fontWeight: '600',
       color: '#111827',
-      marginBottom: '0.25rem'
+      marginBottom: '0.5rem'
     },
     comingSoonDesc: {
-      fontSize: '0.875rem',
+      fontSize: '1rem',
       color: '#6b7280',
-      lineHeight: 1.4
+      lineHeight: 1.5
     },
     comingSoonBadge: {
       backgroundColor: '#8b5cf6',
       color: 'white',
-      padding: '0.25rem 0.75rem',
+      padding: '0.5rem 1rem',
       borderRadius: '1rem',
-      fontSize: '0.75rem',
+      fontSize: '0.875rem',
       fontWeight: '600'
     }
   };
@@ -157,46 +177,72 @@ const MoreView = ({ setActiveTab }) => {
   };
 
   return (
-    <div style={styles.container}>
+    <div style={containerStyle}>
       {/* Header */}
-      <div style={styles.header}>
-        <h1 style={styles.title}>More</h1>
-        <p style={styles.subtitle}>All features & settings</p>
+      <div style={headerStyle}>
+        <h1 style={{
+          fontSize: '2rem',
+          fontWeight: '700',
+          color: '#111827',
+          marginBottom: '0.5rem'
+        }}>
+          ⚙️ More
+        </h1>
+        <p style={{
+          fontSize: '1rem',
+          color: '#6b7280'
+        }}>
+          Features, settings & info
+        </p>
       </div>
 
       {/* Main Content */}
-      <div style={styles.content}>
+      <div style={{ padding: mobileStyles.spacing.md }}>
         {/* Main Features */}
-        <div style={styles.card}>
-          <h2 style={styles.cardTitle}>
+        <div style={cardStyle}>
+          <h2 style={cardTitleStyle}>
             <span>🎯</span> Features
           </h2>
           
-          <div style={styles.featureGrid}>
+          <div>
             {mainFeatures.map(feature => (
               <button
                 key={feature.id}
-                style={styles.featureButton}
+                style={featureButtonStyle}
                 onClick={() => setActiveTab(feature.tab)}
+                onTouchStart={(e) => {
+                  e.currentTarget.style.transform = 'scale(0.98)';
+                  e.currentTarget.style.borderColor = '#0891b2';
+                }}
+                onTouchEnd={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.borderColor = '#e5e7eb';
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.borderColor = '#0891b2';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.borderColor = '#e5e7eb';
                 }}
               >
-                <div style={styles.featureIcon}>{feature.icon}</div>
-                <div style={styles.featureLabel}>{feature.label}</div>
+                <div style={{ fontSize: '2.5rem' }}>{feature.icon}</div>
+                <div style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827'
+                }}>{feature.label}</div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Coming Soon Section */}
-        <div style={styles.card}>
-          <h2 style={styles.cardTitle}>
+        <div style={cardStyle}>
+          <h2 style={cardTitleStyle}>
             <span>✨</span> Coming Soon
           </h2>
           
@@ -210,6 +256,14 @@ const MoreView = ({ setActiveTab }) => {
                   borderColor: feature.special ? '#8b5cf6' : '#e5e7eb'
                 }}
                 onClick={() => handleFeatureClick(feature)}
+                onTouchStart={(e) => {
+                  if (feature.special) {
+                    e.currentTarget.style.transform = 'scale(0.98)';
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.opacity = '1';
                   if (feature.special) {
@@ -250,41 +304,37 @@ const MoreView = ({ setActiveTab }) => {
         </div>
 
         {/* App Info */}
-        <div style={styles.card}>
-          <h2 style={styles.cardTitle}>
+        <div style={cardStyle}>
+          <h2 style={cardTitleStyle}>
             <span>📱</span> App Info
           </h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ fontSize: '1rem', color: '#4b5563' }}>
               <strong>Version:</strong> 2.0.0
             </div>
-            <div style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+            <div style={{ fontSize: '1rem', color: '#4b5563' }}>
               <strong>Beach Location:</strong> Sea Bright, NJ
             </div>
             {user && (
-              <div style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+              <div style={{ fontSize: '1rem', color: '#4b5563' }}>
                 <strong>Logged in as:</strong> {user.display_name || user.first_name || user.email}
               </div>
             )}
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: mobileStyles.spacing.md, marginTop: mobileStyles.spacing.lg }}>
             <button
               style={{
+                ...bigButtonStyle,
                 backgroundColor: '#10b981',
-                color: 'white',
-                border: 'none',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.75rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem'
+                boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)'
+              }}
+              onTouchStart={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onTouchEnd={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
               }}
               onClick={() => {
                 // Check if browser supports PWA installation
@@ -311,20 +361,12 @@ const MoreView = ({ setActiveTab }) => {
             </button>
             
             <button
-              style={{
-                backgroundColor: '#0891b2',
-                color: 'white',
-                border: 'none',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.75rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem'
+              style={bigButtonStyle}
+              onTouchStart={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onTouchEnd={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
               }}
               onClick={() => {
                 if ('share' in navigator) {
@@ -349,6 +391,147 @@ const MoreView = ({ setActiveTab }) => {
           </div>
         </div>
       </div>
+
+      {/* Floating Quick Actions Button */}
+      <button
+        onClick={() => setShowQuickActions(!showQuickActions)}
+        style={{
+          position: 'fixed',
+          bottom: '6rem',
+          right: '1rem',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          backgroundColor: showQuickActions ? '#ef4444' : '#8b5cf6',
+          color: 'white',
+          border: 'none',
+          fontSize: '1.5rem',
+          boxShadow: '0 4px 16px rgba(139, 92, 246, 0.4)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          transition: 'all 0.2s'
+        }}
+        onTouchStart={(e) => {
+          e.currentTarget.style.transform = 'scale(0.95)';
+        }}
+        onTouchEnd={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+        aria-label="Quick actions"
+      >
+        {showQuickActions ? '✕' : '⚡'}
+      </button>
+
+      {/* Quick Actions Menu */}
+      {showQuickActions && (
+        <div style={{
+          position: 'fixed',
+          bottom: '11rem',
+          right: '1rem',
+          backgroundColor: '#ffffff',
+          borderRadius: '1rem',
+          padding: mobileStyles.spacing.md,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+          zIndex: 99,
+          minWidth: '200px',
+          border: '1px solid #e5e7eb'
+        }}>
+          <button
+            onClick={() => {
+              setActiveTab('profile');
+              setShowQuickActions(false);
+            }}
+            style={{
+              width: '100%',
+              minHeight: '56px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              marginBottom: mobileStyles.spacing.sm,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              color: '#374151'
+            }}
+            onTouchStart={(e) => {
+              e.currentTarget.style.transform = 'scale(0.98)';
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            👤 Profile
+          </button>
+          
+          <button
+            onClick={() => {
+              setActiveTab('sasqwatch');
+              setShowQuickActions(false);
+            }}
+            style={{
+              width: '100%',
+              minHeight: '56px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              marginBottom: mobileStyles.spacing.sm,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              color: '#374151'
+            }}
+            onTouchStart={(e) => {
+              e.currentTarget.style.transform = 'scale(0.98)';
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            👣 SasqWatch
+          </button>
+          
+          <button
+            onClick={() => {
+              setActiveTab('photos');
+              setShowQuickActions(false);
+            }}
+            style={{
+              width: '100%',
+              minHeight: '56px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              color: '#374151'
+            }}
+            onTouchStart={(e) => {
+              e.currentTarget.style.transform = 'scale(0.98)';
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            📸 Photos
+          </button>
+        </div>
+      )}
 
       {/* LumaLocator Modal */}
       {showLumaModal && (
@@ -446,12 +629,20 @@ const MoreView = ({ setActiveTab }) => {
                 backgroundColor: '#8b5cf6',
                 color: 'white',
                 border: 'none',
-                padding: '0.75rem 2rem',
-                borderRadius: '0.75rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
+                padding: '1rem 2rem',
+                borderRadius: '1rem',
+                fontSize: '1.125rem',
+                fontWeight: '700',
                 cursor: 'pointer',
-                width: '100%'
+                width: '100%',
+                minHeight: '60px',
+                transition: 'all 0.2s'
+              }}
+              onTouchStart={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onTouchEnd={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
               }}
               onClick={() => {
                 alert('TRACKING INITIATED...\n\nError: Lumas have disabled location services.\n\nLast message: "Almost there!"');

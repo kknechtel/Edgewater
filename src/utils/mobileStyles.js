@@ -89,13 +89,14 @@ export const getMobileOptimizedStyles = () => {
     
     weatherTab: (isActive) => ({
       flex: isMobile ? '0 0 auto' : '1',
-      minWidth: isMobile ? '80px' : 'auto',
-      padding: `${safeMargin * 0.5}rem ${safeMargin}rem`,
+      minWidth: isMobile ? '85px' : 'auto',
+      minHeight: '44px',
+      padding: `${safeMargin * 0.75}rem ${safeMargin}rem`,
       border: 'none',
       borderRadius: '0.5rem',
       backgroundColor: isActive ? '#ffffff' : 'transparent',
       color: isActive ? '#0891b2' : '#6b7280',
-      fontSize: isMobile ? '0.75rem' : '0.875rem',
+      fontSize: isMobile ? '0.875rem' : '0.9375rem',
       fontWeight: '600',
       cursor: 'pointer',
       display: 'flex',
@@ -201,5 +202,39 @@ export const responsive = {
     const vw = typeof window !== 'undefined' ? Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) : 768;
     const base = Math.max(0.5, Math.min(1.5, vw * 0.04));
     return `${base * multiplier}rem`;
+  },
+
+  // Image optimization utilities
+  imageOptimization: {
+    // Lazy loading attributes
+    lazyLoading: {
+      loading: 'lazy',
+      decoding: 'async'
+    },
+    
+    // Responsive image styles
+    responsiveImage: {
+      width: '100%',
+      height: 'auto',
+      maxWidth: '100%',
+      objectFit: 'cover',
+      borderRadius: '0.5rem'
+    },
+    
+    // Avatar image styles
+    avatar: (size = '48px') => ({
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      objectFit: 'cover',
+      border: '2px solid #e5e7eb'
+    }),
+    
+    // Icon optimized styles
+    icon: {
+      width: '1.5rem',
+      height: '1.5rem',
+      objectFit: 'contain'
+    }
   }
 };

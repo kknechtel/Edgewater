@@ -546,18 +546,19 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
             
             return (
               <div key={index} style={{
-                minHeight: '60px',
-                maxHeight: '70px',
+                minHeight: '80px',
+                maxHeight: 'none',
                 backgroundColor: date ? '#ffffff' : '#f9fafb',
-                padding: '0.1rem',
+                padding: '0.5rem',
                 position: 'relative',
                 cursor: date ? 'pointer' : 'default',
-                border: isToday ? '2px solid #0891b2' : 'none',
-                transition: 'background-color 0.2s',
-                fontSize: '0.7rem',
+                border: isToday ? '3px solid #0891b2' : '1px solid #e5e7eb',
+                transition: 'all 0.2s',
+                fontSize: '1rem',
                 overflow: 'hidden',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                borderRadius: '0.5rem'
               }}
               onClick={() => date && setSelectedDate(date)}
               onMouseEnter={(e) => {
@@ -1043,47 +1044,11 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerTop}>
-          <div>
+          <div style={{ textAlign: 'center', width: '100%' }}>
             <h1 style={styles.title}>
-              <span>📅</span> Events Calendar
+              <span>📅</span> Events
             </h1>
-            <p style={styles.subtitle}>Manage and view all beach club events</p>
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button
-              onClick={() => setShowTournamentModal(true)}
-              style={{
-                ...styles.btnSecondary,
-                onMouseEnter: (e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
-                }
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <span>🎯</span> New Tournament
-            </button>
-            <button
-              onClick={handleCreateEvent}
-              style={styles.btnPrimary}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <span>+</span> New Event
-            </button>
+            <p style={styles.subtitle}>Beach club calendar</p>
           </div>
         </div>
       </div>
@@ -1126,89 +1091,108 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
 
           {/* Month Navigation */}
           {viewMode === 'month' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              backgroundColor: '#ffffff',
+              borderRadius: '0.75rem',
+              padding: '0.5rem',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
               <button
                 onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}
                 style={{
-                  padding: '0.5rem',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e5e7eb',
+                  padding: '0.75rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
                   borderRadius: '0.5rem',
                   cursor: 'pointer',
-                  fontSize: '1.25rem',
+                  fontSize: '1.5rem',
                   lineHeight: '1',
-                  minWidth: '40px',
-                  minHeight: '40px',
+                  minWidth: '48px',
+                  minHeight: '48px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.backgroundColor = '#e2e8f0';
+                  e.currentTarget.style.transform = 'scale(1.05)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
+                aria-label="Previous month"
               >
                 ‹
               </button>
-              <button
-                onClick={() => setSelectedDate(new Date())}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: '#0891b2',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ecfeff';
-                  e.currentTarget.style.borderColor = '#0891b2';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.borderColor = '#e5e7eb';
-                }}
-              >
-                Today
-              </button>
-              <span style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                minWidth: '180px',
-                textAlign: 'center',
-                color: '#111827'
-              }}>
-                {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </span>
+              
+              <div style={{ textAlign: 'center', flex: 1 }}>
+                <div style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  color: '#111827',
+                  marginBottom: '0.25rem'
+                }}>
+                  {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </div>
+                <button
+                  onClick={() => setSelectedDate(new Date())}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#0891b2',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    transition: 'all 0.2s',
+                    minHeight: '36px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0e7490';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0891b2';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  Today
+                </button>
+              </div>
+              
               <button
                 onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}
                 style={{
-                  padding: '0.5rem',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e5e7eb',
+                  padding: '0.75rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
                   borderRadius: '0.5rem',
                   cursor: 'pointer',
-                  fontSize: '1.25rem',
+                  fontSize: '1.5rem',
                   lineHeight: '1',
-                  minWidth: '40px',
-                  minHeight: '40px',
+                  minWidth: '48px',
+                  minHeight: '48px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.backgroundColor = '#e2e8f0';
+                  e.currentTarget.style.transform = 'scale(1.05)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
+                aria-label="Next month"
               >
                 ›
               </button>
@@ -1231,6 +1215,76 @@ const EnhancedCalendarView = ({ eventModalData, setEventModalData }) => {
         ) : (
           viewMode === 'month' ? renderMonthView() : renderListView()
         )}
+      </div>
+
+      {/* Thumb-friendly floating action buttons */}
+      <div style={{
+        position: 'fixed',
+        bottom: '6rem',
+        right: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        zIndex: 100
+      }}>
+        <button
+          onClick={handleCreateEvent}
+          style={{
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            backgroundColor: '#0891b2',
+            color: 'white',
+            border: 'none',
+            fontSize: '1.5rem',
+            boxShadow: '0 4px 16px rgba(8, 145, 178, 0.4)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.1)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(8, 145, 178, 0.6)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(8, 145, 178, 0.4)';
+          }}
+          aria-label="Create new event"
+        >
+          ✚
+        </button>
+        <button
+          onClick={() => setShowTournamentModal(true)}
+          style={{
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            backgroundColor: '#f59e0b',
+            color: 'white',
+            border: 'none',
+            fontSize: '1.5rem',
+            boxShadow: '0 4px 16px rgba(245, 158, 11, 0.4)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.1)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.6)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(245, 158, 11, 0.4)';
+          }}
+          aria-label="Create new tournament"
+        >
+          🎯
+        </button>
       </div>
 
       {/* Band Details Modal */}

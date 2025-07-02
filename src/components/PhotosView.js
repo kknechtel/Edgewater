@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 
 const PhotosView = () => {
   const { user } = useAuth();
@@ -12,6 +13,8 @@ const PhotosView = () => {
     url: ''
   });
 
+  const mobileStyles = getMobileOptimizedStyles();
+
   // Sample photos
   const samplePhotos = [
     {
@@ -22,7 +25,8 @@ const PhotosView = () => {
       uploadedBy: 'Beach Lover',
       uploadedAt: new Date().toISOString(),
       likes: 15,
-      comments: []
+      comments: [],
+      likedBy: []
     },
     {
       id: 2,
@@ -32,7 +36,8 @@ const PhotosView = () => {
       uploadedBy: 'Sandy Artist',
       uploadedAt: new Date(Date.now() - 86400000).toISOString(),
       likes: 23,
-      comments: []
+      comments: [],
+      likedBy: []
     },
     {
       id: 3,
@@ -42,17 +47,16 @@ const PhotosView = () => {
       uploadedBy: 'Wave Rider',
       uploadedAt: new Date(Date.now() - 172800000).toISOString(),
       likes: 31,
-      comments: []
+      comments: [],
+      likedBy: []
     }
   ];
 
   useEffect(() => {
-    // Load photos from localStorage
     const saved = localStorage.getItem('beach_photos');
     if (saved) {
       setPhotos(JSON.parse(saved));
     } else {
-      // Initialize with sample data
       setPhotos(samplePhotos);
       localStorage.setItem('beach_photos', JSON.stringify(samplePhotos));
     }
@@ -64,7 +68,7 @@ const PhotosView = () => {
     const newPhoto = {
       id: Date.now(),
       ...formData,
-      uploadedBy: user.display_name || user.email,
+      uploadedBy: user?.display_name || user?.email || 'Anonymous',
       uploadedAt: new Date().toISOString(),
       likes: 0,
       comments: [],
@@ -83,41 +87,22 @@ const PhotosView = () => {
     const updatedPhotos = photos.map(photo => {
       if (photo.id === photoId) {
         const likedBy = photo.likedBy || [];
-        const userLiked = likedBy.includes(user.id);
+        const userId = user?.id || 'anonymous';
+        const userLiked = likedBy.includes(userId);
         
         if (userLiked) {
           return {
             ...photo,
             likes: photo.likes - 1,
-            likedBy: likedBy.filter(id => id !== user.id)
+            likedBy: likedBy.filter(id => id !== userId)
           };
         } else {
           return {
             ...photo,
             likes: photo.likes + 1,
-            likedBy: [...likedBy, user.id]
+            likedBy: [...likedBy, userId]
           };
         }
-      }
-      return photo;
-    });
-    
-    setPhotos(updatedPhotos);
-    localStorage.setItem('beach_photos', JSON.stringify(updatedPhotos));
-  };
-
-  const handleComment = (photoId, comment) => {
-    const updatedPhotos = photos.map(photo => {
-      if (photo.id === photoId) {
-        return {
-          ...photo,
-          comments: [...(photo.comments || []), {
-            id: Date.now(),
-            text: comment,
-            author: user.display_name || user.email,
-            timestamp: new Date().toISOString()
-          }]
-        };
       }
       return photo;
     });
@@ -134,231 +119,352 @@ const PhotosView = () => {
     const days = Math.floor(diff / 86400000);
 
     if (days > 7) return then.toLocaleDateString();
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
     return 'Just now';
   };
 
+  const containerStyle = {
+    minHeight: '100vh',
+    backgroundColor: '#f0f9ff',
+    paddingBottom: '6rem'
+  };
+
+  const headerStyle = {
+    backgroundColor: '#ffffff',
+    padding: mobileStyles.spacing.md,
+    textAlign: 'center',
+    borderBottom: '2px solid #0891b2',
+    boxShadow: '0 2px 8px rgba(8, 145, 178, 0.2)'
+  };
+
+  const cardStyle = {
+    ...mobileStyles.card,
+    marginBottom: mobileStyles.spacing.md,
+    overflow: 'hidden',
+    border: '1px solid #e5e7eb'
+  };
+
+  const bigButtonStyle = {
+    width: '100%',
+    minHeight: '60px',
+    backgroundColor: '#0891b2',
+    color: 'white',
+    border: 'none',
+    borderRadius: '1rem',
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    margin: mobileStyles.spacing.sm,
+    boxShadow: '0 4px 16px rgba(8, 145, 178, 0.3)',
+    transition: 'all 0.2s',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
+  };
+
+  const actionButtonStyle = {
+    minHeight: '56px',
+    minWidth: '56px',
+    border: 'none',
+    borderRadius: '1rem',
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    transition: 'all 0.2s',
+    padding: '0 1rem'
+  };
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+    <div style={containerStyle}>
+      {/* Header */}
+      <div style={headerStyle}>
+        <h1 style={{
+          fontSize: '2rem',
+          fontWeight: '700',
+          color: '#111827',
+          marginBottom: '0.5rem'
+        }}>
           📸 Beach Photos
         </h1>
-        <p style={{ color: '#666' }}>Share and enjoy photos from our beach community</p>
+        <p style={{
+          fontSize: '1rem',
+          color: '#6b7280'
+        }}>
+          Share moments from the beach
+        </p>
       </div>
 
       {/* Upload Button */}
-      <div style={{ marginBottom: '2rem' }}>
+      <div style={{ padding: mobileStyles.spacing.md }}>
         <button
           onClick={() => setShowUploadForm(!showUploadForm)}
           style={{
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            padding: '0.75rem 1.5rem',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '1rem',
-            fontWeight: '500',
-            cursor: 'pointer'
+            ...bigButtonStyle,
+            backgroundColor: showUploadForm ? '#ef4444' : '#10b981',
+            boxShadow: showUploadForm ? 
+              '0 4px 16px rgba(239, 68, 68, 0.3)' : 
+              '0 4px 16px rgba(16, 185, 129, 0.3)'
+          }}
+          onTouchStart={(e) => {
+            e.currentTarget.style.transform = 'scale(0.98)';
+          }}
+          onTouchEnd={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
-          {showUploadForm ? '❌ Cancel' : '📸 Upload Photo'}
+          {showUploadForm ? '❌ Cancel Upload' : '📸 Share Photo'}
         </button>
       </div>
 
       {/* Upload Form */}
       {showUploadForm && (
-        <div style={{
-          backgroundColor: 'white',
-          padding: '2rem',
-          borderRadius: '8px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          marginBottom: '2rem'
-        }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
-            Upload New Photo
-          </h2>
-          
-          <form onSubmit={handleUpload}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                Photo URL
-              </label>
-              <input
-                type="url"
-                value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                required
-                placeholder="https://example.com/photo.jpg"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '1rem'
-                }}
-              />
-              <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
-                Tip: Use image hosting services like Imgur or direct image URLs
+        <div style={{ padding: mobileStyles.spacing.md }}>
+          <div style={cardStyle}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: mobileStyles.spacing.lg,
+              color: '#111827',
+              textAlign: 'center'
+            }}>
+              📤 Share Your Photo
+            </h2>
+            
+            <form onSubmit={handleUpload}>
+              <div style={{ marginBottom: mobileStyles.spacing.lg }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  marginBottom: mobileStyles.spacing.sm,
+                  color: '#374151'
+                }}>
+                  Photo URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.url}
+                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                  required
+                  placeholder="Paste image URL here"
+                  style={{
+                    width: '100%',
+                    minHeight: '56px',
+                    padding: mobileStyles.spacing.md,
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '1rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
               </div>
-            </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                Title
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-                placeholder="Give your photo a title"
+              <div style={{ marginBottom: mobileStyles.spacing.lg }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  marginBottom: mobileStyles.spacing.sm,
+                  color: '#374151'
+                }}>
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  required
+                  placeholder="What's in this photo?"
+                  style={{
+                    width: '100%',
+                    minHeight: '56px',
+                    padding: mobileStyles.spacing.md,
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '1rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: mobileStyles.spacing.lg }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  marginBottom: mobileStyles.spacing.sm,
+                  color: '#374151'
+                }}>
+                  Description (optional)
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Tell us about this moment..."
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: mobileStyles.spacing.md,
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '1rem',
+                    resize: 'vertical',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
                 style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '1rem'
+                  ...bigButtonStyle,
+                  backgroundColor: '#10b981',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)'
                 }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Tell us about this photo..."
-                rows={3}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '1rem',
-                  resize: 'vertical'
+                onTouchStart={(e) => {
+                  e.currentTarget.style.transform = 'scale(0.98)';
                 }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              style={{
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              Upload Photo
-            </button>
-          </form>
+                onTouchEnd={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                🚀 Share Photo
+              </button>
+            </form>
+          </div>
         </div>
       )}
 
-      {/* Photo Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-        gap: '1.5rem' 
-      }}>
-        {photos.map((photo) => (
-          <div
-            key={photo.id}
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              overflow: 'hidden'
-            }}
-          >
-            <img
-              src={photo.url}
-              alt={photo.title}
-              onClick={() => setSelectedPhoto(photo)}
-              style={{
-                width: '100%',
-                height: '250px',
-                objectFit: 'cover',
-                cursor: 'pointer'
-              }}
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
-              }}
-            />
-            
-            <div style={{ padding: '1rem' }}>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                {photo.title}
-              </h3>
-              
-              {photo.description && (
-                <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
-                  {photo.description}
-                </p>
-              )}
-              
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+      {/* Photos Feed */}
+      <div style={{ padding: mobileStyles.spacing.md }}>
+        {photos.length === 0 ? (
+          <div style={cardStyle}>
+            <div style={{
+              textAlign: 'center',
+              padding: mobileStyles.spacing.xl,
+              color: '#6b7280'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>📸</div>
+              <p style={{ fontSize: '1rem' }}>No photos yet. Be the first to share!</p>
+            </div>
+          </div>
+        ) : (
+          photos.map((photo) => (
+            <div key={photo.id} style={cardStyle}>
+              {/* Photo Header */}
+              <div style={{
+                padding: mobileStyles.spacing.md,
+                borderBottom: '1px solid #f3f4f6',
+                display: 'flex',
                 alignItems: 'center',
-                fontSize: '0.875rem',
-                color: '#666',
-                marginBottom: '1rem'
+                justifyContent: 'space-between'
               }}>
-                <span>by {photo.uploadedBy}</span>
-                <span>{getTimeAgo(photo.uploadedAt)}</span>
+                <div>
+                  <h3 style={{
+                    fontSize: '1.25rem',
+                    fontWeight: '700',
+                    color: '#111827',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {photo.title}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: '#6b7280'
+                  }}>
+                    by {photo.uploadedBy} • {getTimeAgo(photo.uploadedAt)}
+                  </p>
+                </div>
               </div>
-              
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                paddingTop: '1rem',
-                borderTop: '1px solid #eee'
+
+              {/* Photo Image */}
+              <div
+                style={{ cursor: 'pointer' }}
+                onClick={() => setSelectedPhoto(photo)}
+              >
+                <img
+                  src={photo.url}
+                  alt={photo.title}
+                  style={{
+                    width: '100%',
+                    height: '300px',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/800x600/e5e7eb/6b7280?text=Image+Not+Found';
+                  }}
+                />
+              </div>
+
+              {/* Photo Description */}
+              {photo.description && (
+                <div style={{
+                  padding: mobileStyles.spacing.md,
+                  borderBottom: '1px solid #f3f4f6'
+                }}>
+                  <p style={{
+                    fontSize: '1rem',
+                    color: '#374151',
+                    lineHeight: '1.5'
+                  }}>
+                    {photo.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Photo Actions */}
+              <div style={{
+                padding: mobileStyles.spacing.md,
+                display: 'flex',
+                gap: mobileStyles.spacing.md,
+                alignItems: 'center'
               }}>
                 <button
                   onClick={() => handleLike(photo.id)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    background: 'none',
-                    border: 'none',
-                    color: photo.likedBy?.includes(user.id) ? '#e91e63' : '#666',
-                    fontSize: '1rem',
-                    cursor: 'pointer'
+                    ...actionButtonStyle,
+                    backgroundColor: photo.likedBy?.includes(user?.id || 'anonymous') ? '#fef2f2' : '#f8fafc',
+                    color: photo.likedBy?.includes(user?.id || 'anonymous') ? '#dc2626' : '#6b7280',
+                    border: photo.likedBy?.includes(user?.id || 'anonymous') ? '2px solid #dc2626' : '2px solid #e5e7eb'
+                  }}
+                  onTouchStart={(e) => {
+                    e.currentTarget.style.transform = 'scale(0.95)';
+                  }}
+                  onTouchEnd={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
                   }}
                 >
-                  {photo.likedBy?.includes(user.id) ? '❤️' : '🤍'} {photo.likes}
+                  {photo.likedBy?.includes(user?.id || 'anonymous') ? '❤️' : '🤍'} {photo.likes}
                 </button>
                 
                 <button
                   onClick={() => setSelectedPhoto(photo)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    background: 'none',
-                    border: 'none',
-                    color: '#666',
-                    fontSize: '1rem',
-                    cursor: 'pointer'
+                    ...actionButtonStyle,
+                    backgroundColor: '#f8fafc',
+                    color: '#6b7280',
+                    border: '2px solid #e5e7eb'
+                  }}
+                  onTouchStart={(e) => {
+                    e.currentTarget.style.transform = 'scale(0.95)';
+                  }}
+                  onTouchEnd={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
                   }}
                 >
                   💬 {photo.comments?.length || 0}
                 </button>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Photo Modal */}
@@ -370,23 +476,54 @@ const PhotosView = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.9)',
             zIndex: 1000,
-            padding: '2rem'
+            display: 'flex',
+            flexDirection: 'column'
           }}
           onClick={() => setSelectedPhoto(null)}
         >
+          {/* Close Button */}
+          <div style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            zIndex: 1001
+          }}>
+            <button
+              onClick={() => setSelectedPhoto(null)}
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onTouchStart={(e) => {
+                e.currentTarget.style.transform = 'scale(0.95)';
+              }}
+              onTouchEnd={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Photo */}
           <div
             style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              maxWidth: '800px',
-              maxHeight: '90vh',
-              overflow: 'auto',
-              width: '100%'
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -394,77 +531,111 @@ const PhotosView = () => {
               src={selectedPhoto.url}
               alt={selectedPhoto.title}
               style={{
-                width: '100%',
-                height: 'auto'
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain'
               }}
             />
+          </div>
+
+          {/* Photo Info */}
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: mobileStyles.spacing.md,
+              maxHeight: '40vh',
+              overflowY: 'auto'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: '0.5rem',
+              color: '#111827'
+            }}>
+              {selectedPhoto.title}
+            </h2>
             
-            <div style={{ padding: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                {selectedPhoto.title}
-              </h2>
-              
-              {selectedPhoto.description && (
-                <p style={{ color: '#666', marginBottom: '1rem' }}>
-                  {selectedPhoto.description}
-                </p>
-              )}
-              
-              <div style={{ 
-                fontSize: '0.875rem',
-                color: '#666',
-                marginBottom: '1.5rem'
+            {selectedPhoto.description && (
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1rem',
+                fontSize: '1rem',
+                lineHeight: '1.5'
               }}>
-                by {selectedPhoto.uploadedBy} • {getTimeAgo(selectedPhoto.uploadedAt)}
-              </div>
-              
-              {/* Comments */}
-              <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
-                  Comments ({selectedPhoto.comments?.length || 0})
-                </h3>
-                
-                {selectedPhoto.comments?.map((comment) => (
-                  <div key={comment.id} style={{ marginBottom: '1rem' }}>
-                    <div style={{ fontWeight: '500' }}>{comment.author}</div>
-                    <div style={{ color: '#666', fontSize: '0.875rem' }}>
-                      {comment.text}
-                    </div>
-                    <div style={{ color: '#999', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                      {getTimeAgo(comment.timestamp)}
-                    </div>
-                  </div>
-                ))}
-                
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const comment = e.target.comment.value;
-                    if (comment) {
-                      handleComment(selectedPhoto.id, comment);
-                      e.target.comment.value = '';
-                    }
-                  }}
-                  style={{ marginTop: '1rem' }}
-                >
-                  <input
-                    name="comment"
-                    type="text"
-                    placeholder="Add a comment..."
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '1rem'
-                    }}
-                  />
-                </form>
-              </div>
+                {selectedPhoto.description}
+              </p>
+            )}
+            
+            <div style={{
+              fontSize: '0.875rem',
+              color: '#9ca3af',
+              marginBottom: '1rem'
+            }}>
+              by {selectedPhoto.uploadedBy} • {getTimeAgo(selectedPhoto.uploadedAt)}
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: mobileStyles.spacing.md,
+              marginBottom: '1rem'
+            }}>
+              <button
+                onClick={() => handleLike(selectedPhoto.id)}
+                style={{
+                  ...actionButtonStyle,
+                  backgroundColor: selectedPhoto.likedBy?.includes(user?.id || 'anonymous') ? '#fef2f2' : '#f8fafc',
+                  color: selectedPhoto.likedBy?.includes(user?.id || 'anonymous') ? '#dc2626' : '#6b7280',
+                  border: selectedPhoto.likedBy?.includes(user?.id || 'anonymous') ? '2px solid #dc2626' : '2px solid #e5e7eb'
+                }}
+                onTouchStart={(e) => {
+                  e.currentTarget.style.transform = 'scale(0.95)';
+                }}
+                onTouchEnd={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                {selectedPhoto.likedBy?.includes(user?.id || 'anonymous') ? '❤️' : '🤍'} {selectedPhoto.likes}
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Floating Upload Button */}
+      <button
+        onClick={() => setShowUploadForm(true)}
+        style={{
+          position: 'fixed',
+          bottom: '6rem',
+          right: '1rem',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          backgroundColor: '#10b981',
+          color: 'white',
+          border: 'none',
+          fontSize: '1.5rem',
+          boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          transition: 'all 0.2s'
+        }}
+        onTouchStart={(e) => {
+          e.currentTarget.style.transform = 'scale(0.95)';
+        }}
+        onTouchEnd={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+        aria-label="Upload photo"
+      >
+        📸
+      </button>
     </div>
   );
 };

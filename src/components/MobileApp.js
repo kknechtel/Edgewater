@@ -109,57 +109,88 @@ const MobileApp = () => {
       overflow: 'hidden' // Prevent any horizontal scroll
     }}>
       {/* Main Content */}
-      <main style={{
-        flex: 1,
-        paddingBottom: '5rem', // Account for fixed bottom nav
-        overflowY: 'auto',
-        overflowX: 'hidden', // Prevent horizontal scroll
-        WebkitOverflowScrolling: 'touch',
-        width: '100%',
-        maxWidth: '100vw',
-        boxSizing: 'border-box'
-      }}>
+      <main 
+        style={{
+          flex: 1,
+          paddingBottom: '5rem', // Account for fixed bottom nav
+          overflowY: 'auto',
+          overflowX: 'hidden', // Prevent horizontal scroll
+          WebkitOverflowScrolling: 'touch',
+          width: '100%',
+          maxWidth: '100vw',
+          boxSizing: 'border-box'
+        }}
+        role="main"
+        aria-label="Main content"
+      >
         {renderContent()}
       </main>
 
       {/* Bottom Navigation */}
-      <nav style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        width: '100vw',
-        maxWidth: '100%',
-        backgroundColor: '#ffffff',
-        borderTop: '1px solid #e5e7eb',
-        display: 'flex',
-        justifyContent: 'space-around',
-        padding: `${mobileStyles.spacing.sm} 0`,
-        paddingBottom: `calc(${mobileStyles.spacing.sm} + env(safe-area-inset-bottom))`,
-        boxShadow: '0 -1px 3px 0 rgb(0 0 0 / 0.1)',
-        zIndex: 1000,
-        boxSizing: 'border-box'
-      }}>
+      <nav 
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: '100vw',
+          maxWidth: '100%',
+          backgroundColor: '#ffffff',
+          borderTop: '1px solid #e5e7eb',
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: `${mobileStyles.spacing.sm} 0`,
+          paddingBottom: `calc(${mobileStyles.spacing.sm} + env(safe-area-inset-bottom))`,
+          boxShadow: '0 -1px 3px 0 rgb(0 0 0 / 0.1)',
+          zIndex: 1000,
+          boxSizing: 'border-box'
+        }}
+        role="tablist"
+        aria-label="Main navigation"
+      >
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              aria-label={`Navigate to ${tab.label}`}
+              aria-current={isActive ? 'page' : undefined}
+              role="tab"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                padding: '0.5rem',
+                padding: '0.75rem 0.5rem',
                 cursor: 'pointer',
                 color: isActive ? '#0891b2' : '#6b7280',
                 textDecoration: 'none',
-                background: 'none',
+                background: isActive ? 'rgba(8, 145, 178, 0.05)' : 'none',
                 border: 'none',
+                borderRadius: '0.75rem',
+                margin: '0.25rem',
                 flex: 1,
-                minWidth: 0,
-                transition: 'color 0.2s',
-                position: 'relative'
+                minWidth: '68px',
+                minHeight: '64px',
+                transition: 'all 0.2s ease',
+                position: 'relative',
+                transform: 'scale(1)'
+              }}
+              onTouchStart={(e) => {
+                e.currentTarget.style.transform = 'scale(0.95)';
+                e.currentTarget.style.backgroundColor = isActive ? 'rgba(8, 145, 178, 0.1)' : 'rgba(107, 114, 128, 0.05)';
+              }}
+              onTouchEnd={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.backgroundColor = isActive ? 'rgba(8, 145, 178, 0.05)' : 'none';
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'rgba(107, 114, 128, 0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = isActive ? 'rgba(8, 145, 178, 0.05)' : 'none';
               }}
             >
               {/* Active indicator */}
@@ -177,11 +208,12 @@ const MobileApp = () => {
               )}
               
               <span style={{
-                fontSize: '1.5rem',
-                marginBottom: '0.25rem',
+                fontSize: '1.75rem',
+                marginBottom: '0.375rem',
                 display: 'block',
-                position: 'relative'
-              }}>
+                position: 'relative',
+                transition: 'transform 0.2s'
+              }} aria-hidden="true">
                 {tab.icon}
                 {tab.id === 'messages' && unreadMessages > 0 && (
                   <span style={{
@@ -205,8 +237,9 @@ const MobileApp = () => {
                 )}
               </span>
               <span style={{
-                fontSize: '0.75rem',
-                fontWeight: isActive ? '600' : '400'
+                fontSize: '0.8125rem',
+                fontWeight: isActive ? '700' : '500',
+                letterSpacing: '0.025em'
               }}>
                 {tab.label}
               </span>
