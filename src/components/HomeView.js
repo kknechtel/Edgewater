@@ -4,11 +4,11 @@ import { fetchWeatherData, fetchSurfReport } from '../services/weatherService';
 import { rsvpService } from '../services/rsvpService';
 import { eventService } from '../services/api';
 import { bandGuideData } from '../data/bandGuideData';
+import { commentsService } from '../services/commentsService';
 import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 import HomeEventsSection from './HomeEventsSection';
 
 const HomeView = ({ setActiveTab }) => {
-  console.log('HomeView mounted, setActiveTab:', typeof setActiveTab);
   const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState(null);
@@ -53,7 +53,6 @@ const HomeView = ({ setActiveTab }) => {
   const parseBandDates = (dateString) => {
     const currentYear = new Date().getFullYear();
     const dates = dateString.split(',').map(d => d.trim());
-    console.log('🎵 Parsing band dates:', dateString, '-> split into:', dates);
     
     return dates.map(dateStr => {
       const parts = dateStr.split(' ');
@@ -71,14 +70,11 @@ const HomeView = ({ setActiveTab }) => {
           // If the date is in the past, try next year
           if (parsedDate < today) {
             parsedDate = new Date(currentYear + 1, monthIndex, parseInt(day));
-            console.log('🎵 Date was in past, using next year:', parsedDate);
           }
           
-          console.log('🎵 Parsed date:', month, day, '->', parsedDate);
           return parsedDate;
         }
       }
-      console.log('🎵 Failed to parse date:', dateStr);
       return null;
     }).filter(date => date !== null);
   };
@@ -88,20 +84,18 @@ const HomeView = ({ setActiveTab }) => {
       // Load events from backend API  
       let apiEvents = [];
       try {
-        const response = await eventService.getEvents();
-        apiEvents = Array.isArray(response) ? response : (response.data || []);
+        const response = await eventService.getAllEvents();
+        apiEvents = Array.isArray(response) ? response : (response.events || response.data || []);
       } catch (error) {
         console.log('API events failed, using empty array:', error);
         apiEvents = [];
       }
       
-      // Load band events from bandGuideData (same as calendar)
+      // Load band events from bandGuideData (same logic as EnhancedCalendarView)
       const bandEvents = [];
-      console.log('🎵 Loading band events from bandGuideData...');
       bandGuideData.categories.forEach(category => {
         category.bands.forEach(band => {
           if (band.date) {
-            console.log(`🎵 Processing band: ${band.name}, date: ${band.date}`);
             const dates = parseBandDates(band.date);
             const times = band.time ? band.time.split('/').map(t => t.trim()) : ['6:00 PM'];
             
@@ -115,65 +109,54 @@ const HomeView = ({ setActiveTab }) => {
                   event_time: times[index] || times[0],
                   location: 'Beach Stage',
                   event_type: 'concert',
-                  source: 'band'
+                  created_by: { email: 'system' },
+                  source: 'band',
+                  bandData: band,
+                  category: category.name
                 };
-                console.log(`🎵 Created band event:`, bandEvent);
                 bandEvents.push(bandEvent);
               }
             });
           }
         });
       });
-      console.log(`🎵 Total band events: ${bandEvents.length}`);
-
-      // Add some guaranteed demo events if no bands are found
-      if (bandEvents.length === 0) {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const nextWeek = new Date();
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        
-        const demoBandEvents = [
-          {
-            id: 'demo-band-1',
-            title: 'Summer Beach Concert',
-            description: 'Live music on the beach',
-            event_date: tomorrow.toISOString().split('T')[0],
-            event_time: '6:00 PM',
-            location: 'Beach Stage',
-            event_type: 'concert',
-            source: 'demo'
-          },
-          {
-            id: 'demo-band-2',
-            title: 'Acoustic Night',
-            description: 'Chill acoustic vibes',
-            event_date: nextWeek.toISOString().split('T')[0],
-            event_time: '7:00 PM',
-            location: 'Beach Stage',
-            event_type: 'concert',
-            source: 'demo'
-          }
-        ];
-        
-        console.log('🎵 No band events found, adding demo events:', demoBandEvents);
-        bandEvents.push(...demoBandEvents);
-      }
-
+      
+      // Load bags tournament events from localStorage (same as EnhancedCalendarView)
+      const savedTournaments = localStorage.getItem('bags_tournaments');
+      const tournamentEvents = savedTournaments ? JSON.parse(savedTournaments)
+        .filter(t => t.date)
+        .map(tournament => ({
+          id: `tournament-${tournament.id}`,
+          title: tournament.name,
+          description: tournament.description || `${tournament.type}-player Bags Tournament`,
+          event_date: tournament.date,
+          event_time: tournament.time || '2:00 PM',
+          location: 'Bags Court',
+          event_type: 'tournament',
+          created_by: { email: tournament.createdBy || user?.email || 'system' },
+          source: 'bags',
+          tournamentData: tournament
+        })) : [];
+      
       // Combine all events
-      const allEvents = [...apiEvents, ...bandEvents];
+      const allEvents = [...apiEvents, ...bandEvents, ...tournamentEvents];
       
       // Filter and sort upcoming events
       const now = new Date();
+      now.setHours(0, 0, 0, 0); // Start of today
+      
       const upcoming = allEvents
         .filter(event => new Date(event.event_date) >= now)
         .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
-        .slice(0, 3); // Show only next 3 events
+        .slice(0, 5); // Show first 5 upcoming events
       
-      // Enrich with RSVP data
+      // Enrich with RSVP data and comments
       const enrichedEvents = upcoming.map(event => ({
         ...event,
+        attendees: rsvpService.getEventAttendees(event.id),
         attendeeCount: rsvpService.getAttendeeCount(event.id),
+        comments: commentsService.getEventComments(event.id),
+        commentCount: commentsService.getCommentCount(event.id),
         userRsvp: rsvpService.getUserRsvp(event.id, user?.id)
       }));
       

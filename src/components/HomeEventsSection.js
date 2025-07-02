@@ -6,7 +6,6 @@ const HomeEventsSection = ({ upcomingEvents, setActiveTab, handleRsvp, getEventD
       <h2 
         style={{...styles.cardTitle, cursor: 'pointer'}}
         onClick={() => {
-          console.log('Title clicked, calling setActiveTab');
           setActiveTab('calendar');
         }}
       >
@@ -60,7 +59,6 @@ const HomeEventsSection = ({ upcomingEvents, setActiveTab, handleRsvp, getEventD
                 transition: 'all 0.2s'
               }}
               onClick={() => {
-                console.log('Event clicked, calling setActiveTab');
                 setActiveTab('calendar');
               }}
               onMouseEnter={(e) => {

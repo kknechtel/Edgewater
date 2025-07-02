@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { notificationService } from '../services/notificationService';
+import { getMobileOptimizedStyles } from '../utils/mobileStyles';
 import EnhancedCalendarView from './EnhancedCalendarView';
 import SasqWatch from './SasqWatchView';
 import Photos from './PhotosView';
@@ -93,21 +94,30 @@ const MobileApp = () => {
     }
   };
 
+  // Get mobile-optimized styles
+  const mobileStyles = getMobileOptimizedStyles();
+
   return (
     <div style={{
-      minHeight: '100vh',
+      ...mobileStyles.container,
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: '#f9fafb',
       margin: 0,
-      padding: 0
+      padding: 0,
+      width: '100vw',
+      maxWidth: '100%',
+      overflow: 'hidden' // Prevent any horizontal scroll
     }}>
       {/* Main Content */}
       <main style={{
         flex: 1,
         paddingBottom: '5rem', // Account for fixed bottom nav
         overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch'
+        overflowX: 'hidden', // Prevent horizontal scroll
+        WebkitOverflowScrolling: 'touch',
+        width: '100%',
+        maxWidth: '100vw',
+        boxSizing: 'border-box'
       }}>
         {renderContent()}
       </main>
@@ -118,13 +128,17 @@ const MobileApp = () => {
         bottom: 0,
         left: 0,
         right: 0,
+        width: '100vw',
+        maxWidth: '100%',
         backgroundColor: '#ffffff',
         borderTop: '1px solid #e5e7eb',
         display: 'flex',
         justifyContent: 'space-around',
-        padding: '0.5rem 0',
+        padding: `${mobileStyles.spacing.sm} 0`,
+        paddingBottom: `calc(${mobileStyles.spacing.sm} + env(safe-area-inset-bottom))`,
         boxShadow: '0 -1px 3px 0 rgb(0 0 0 / 0.1)',
-        zIndex: 1000
+        zIndex: 1000,
+        boxSizing: 'border-box'
       }}>
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
