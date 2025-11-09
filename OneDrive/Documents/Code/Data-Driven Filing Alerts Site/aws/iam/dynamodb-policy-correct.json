@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:BatchGetItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:115304973740:table/BankruptcyFilings",
+        "arn:aws:dynamodb:us-east-1:115304973740:table/bankruptcy-filings",
+        "arn:aws:dynamodb:us-east-1:115304973740:table/bankruptcy-filings/index/*"
+      ]
+    }
+  ]
+}
+
